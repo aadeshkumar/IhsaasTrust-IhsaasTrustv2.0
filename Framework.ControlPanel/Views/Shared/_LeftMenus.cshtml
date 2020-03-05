@@ -1,0 +1,158 @@
+﻿@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+@*@model List<Menu>*@
+
+<!-- sidebar: style can be found in sidebar.less -->
+<section class="sidebar">
+    <!-- Sidebar user panel -->
+    <div class="user-panel">
+        <div class="pull-left image">
+            @{
+                string imageUrl = !string.IsNullOrEmpty(Authentication.Instance.User.PictureURL) ? Authentication.Instance.User.PictureURL : "/assets/dist/img/default-50x50.gif";
+            }
+            <img src="@imageUrl" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info">
+            <p style="color:#fff;">Welcome @Authentication.Instance.User.DisplayName</p>
+            <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+            <br />
+        </div>
+    </div>
+    @*<ul class="sidebar-menu tree" data-widget="tree">
+            <li class="header"></li>
+            @foreach (var menu in Model.Where(x => x.ParentMenuID == null).OrderBy(x => x.DisplaySeqNo))
+            {
+                <li class="treeview">
+                    <a href="#">
+                        <i class="fa @menu.IconText"></i> <span>@menu.MenuName</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    @if (Model.Where(x => x.ParentMenuID == menu.MenuID) != null && Model.Where(x => x.ParentMenuID == menu.MenuID).Count() != 0)
+                    {
+                        <ul class="treeview-menu">
+                            @foreach (var subMenu in Model.Where(x => x.ParentMenuID == menu.MenuID).OrderBy(x => x.DisplaySeqNo))
+                            {
+                                <li><a href="@subMenu.LinkUrl"><i class="fa @subMenu.IconText"></i> @subMenu.MenuName</a></li>
+                            }
+                        </ul>
+                    }
+                </li>
+            }
+        </ul>*@
+    <!-- Sidebar Menu -->
+    <ul class="sidebar-menu tree" data-widget="tree">
+        <li class="header"></li>
+        <li class="treeview">
+            <a href="#">
+                <i class="fa fa-suitcase"></i> <span>Account Management</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu">
+                @if (Authentication.Instance.User != null && Authentication.Instance.User.RolesRights != null && Authentication.Instance.User.RolesRights.Count != 0 && Authentication.Instance.User.RoleID == 1 || Authentication.Instance.User.RoleID == 109)
+                {
+                    <li><a href="/portal/roles/3/"><i class="fa fa-user-circle-o"></i> Roles</a></li>
+                    <li><a href="/portal/rights/4/"><i class="fa fa-user-circle-o"></i> Rights</a></li>
+                    <li><a href="/portal/roles-rights/"><i class="fa fa-user-circle-o"></i> Roles & Rights</a></li>
+
+                }
+
+                @if (Authentication.Instance.User != null && Authentication.Instance.User.RolesRights != null && Authentication.Instance.User.RolesRights.Count != 0 && Authentication.Instance.User.RoleID == 109)
+                {
+                    <li><a href="/Configuration/SubscriptionRequest/"><i class="fa fa-user-circle-o"></i>Create New Organization</a></li>
+                    <li><a href="/Configuration/Organization/"><i class="fa fa-user-circle-o"></i>Organization List</a></li>
+                }
+                
+                <li><a href="/portal/users-roles/5/"><i class="fa fa-user-circle-o"></i> User Roles</a></li>
+                <li><a href="/portal/users/26/"><i class="fa fa-user-circle-o"></i> Users</a></li>
+                @if (Authentication.Instance.User != null && Authentication.Instance.User.RolesRights != null && Authentication.Instance.User.RolesRights.Count != 0 && Authentication.Instance.User.RoleID == 109)
+                {
+
+                    <li><a href="/portal/dynamic-screen/27/"><i class="fa fa-user-circle-o"></i> User Organization</a></li>
+                }
+            </ul>
+        </li>
+        <li class="treeview">
+
+            <a href="#">
+                <i class="fa fa-file"></i> <span>Application</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+
+            <ul class="treeview-menu">
+                @if ((Authentication.Instance.User.RoleID == (short)RolesEnum.FieldWorker || Authentication.Instance.User.RoleID == (short)RolesEnum.SuperAdmin || Authentication.Instance.User.RoleID == (short)RolesEnum.Admin || Authentication.Instance.User.RoleID == (short)RolesEnum.CEO || Authentication.Instance.User.RoleID == (short)RolesEnum.HeadFieldWorker))
+                {
+                    <li><a href="/portal/application/create"><i class="fa fa-pencil-square-o"></i> Create</a></li>
+                }
+
+                <li><a href="/portal/application/list/"><i class="fa fa-list"></i>List</a></li>
+                <li><a href="/portal/ration-amount/24/"><i class="fa fa-pencil-square-o"></i> Ration Amount</a></li>
+                @if ((Authentication.Instance.User.RoleID == (short)RolesEnum.FieldWorker || Authentication.Instance.User.RoleID == (short)RolesEnum.SuperAdmin || Authentication.Instance.User.RoleID == (short)RolesEnum.Admin || Authentication.Instance.User.RoleID == (short)RolesEnum.CEO || Authentication.Instance.User.RoleID == (short)RolesEnum.HeadFieldWorker))
+                {
+                    <li><a href="/portal/application/Rationlist/"><i class="fa fa-list"></i>Ration List Applications</a></li>
+                }
+                </ul>
+        </li>
+
+        <li class="treeview">
+            <a href="#">
+                <i class="fa fa-user"></i> <span>Approvals</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu">
+                <li><a href="/portal/approval-hierarchy/9/"><i class="fa fa-users"></i>Approval Hierarchy</a></li>
+                <li><a href="/portal/application/approval/"><i class="fa fa-file"></i>Approval Request</a></li>
+            </ul>
+        </li>
+        <li class="treeview">
+            <a href="#">
+                <i class="fa fa-user"></i> <span>Field Settings</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu">
+                @if (Authentication.Instance.User != null && Authentication.Instance.User.RolesRights != null && Authentication.Instance.User.RolesRights.Count != 0 && Authentication.Instance.User.RoleID == 109)
+                {
+                    <li><a href="/portal/field-types/7/"><i class="fa fa-users"></i>Field Types</a></li>
+                }
+                <li><a href="/portal/fields/8/"><i class="fa fa-file"></i>Fields</a></li>
+            </ul>
+        </li>
+
+        @if (Authentication.Instance.User != null && Authentication.Instance.User.RolesRights != null && Authentication.Instance.User.RolesRights.Count != 0 && Authentication.Instance.User.RoleID == 109)
+        {
+            <li class="treeview">
+                <a href="#">
+                    <i class="fa fa-cogs"></i> <span>Settings</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="/Configuration/Entities/"><i class="fa fa-cog"></i> Entities</a></li>
+                    <li><a href="/portal/entity-details/25/"><i class="fa fa-cog"></i> Entity Details</a></li>
+                    <li><a href="/portal/dynamic-screen/1/"><i class="fa fa-cog"></i> Dynamic Screen Setup</a></li>
+
+                </ul>
+            </li>
+        }
+    </ul>
+    <!-- /.sidebar-menu -->
+</section>
+<!-- /.sidebar -->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("a[href='" + document.location.pathname + "']").parent().parent().parent().addClass("menu-open");
+        $("a[href='" + document.location.pathname + "']").parent().addClass("active");
+        $("a[href='" + document.location.pathname + "']").parent().parent().attr("style", "overflow: hidden; display: block;");
+    });
+</script>

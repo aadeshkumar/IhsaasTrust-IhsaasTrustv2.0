@@ -1,0 +1,56 @@
+﻿@using Framework.Shared.DataServices
+@using Newtonsoft.Json
+@model Framework.ControlPanel.Models.DashboardModel
+@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+
+
+@if (Model.DashboardStatus != null && Model.DashboardStatus.Count != 0)
+{
+    <div class="row">
+        @foreach (var status in Model.DashboardStatus.Take(4))
+        {
+            string colorClass = status.StatusName == StatusesEnum.Rejected.ToString() ? "bg-red-gradient" :
+                                status.StatusName == StatusesEnum.Submit.ToString() ? "bg-aqua-gradient" :
+                                status.StatusName == StatusesEnum.Approved.ToString() ? "bg-green-gradient" : "bg-yellow-gradient";
+
+            <div class="col-lg-3 col-xs-6">
+                <!-- small box -->
+                <a href="">
+                    <div class="small-box @colorClass">
+                        <div class="inner">
+                            <h3>@status.StatusCount</h3>
+                            <p>@status.Status</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-stats-bars"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+    if (Model.DashboardStatus.Count > 4)
+    {
+        <div class="row">
+            @foreach (var status in Model.DashboardStatus.Skip(4).Take(4))
+            {
+                <div class="col-lg-3 col-xs-6">
+                    <!-- small box -->
+                    <a href="">
+                        <div class="small-box bg-green">
+                            <div class="inner">
+                                <h3>@status.StatusCount</h3>
+                                <p>@status.Status</p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-stats-bars"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            }
+        </div>
+    }
+}

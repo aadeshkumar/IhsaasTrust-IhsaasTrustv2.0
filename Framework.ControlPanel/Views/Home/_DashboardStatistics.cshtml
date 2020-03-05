@@ -1,0 +1,438 @@
+﻿@using Framework.Shared.DataServices
+@using Newtonsoft.Json
+@model Framework.ControlPanel.Models.DashboardModel
+@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+
+
+@if (Model.TotalAndConcludedApplications != null && Model.TotalAndConcludedApplications.Count != 0)
+{
+    <div class="col-lg-4 col-xs-12">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">Total No. of Created & Concluded Applications</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="chart-responsive">
+                            <div id="totalNoOfApplicationChart" style="width:100%; height:300px;"></div>
+                            <input id="totalNoOfApplicationCount" type="hidden" value="@JsonConvert.SerializeObject(Model.TotalAndConcludedApplications.Select(x => new { countno = x.CountNo, name = x.ColumnName }))" />
+                        </div>
+                        <!-- ./chart-responsive -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer no-padding">
+                <ul class="nav nav-pills nav-stacked">
+                    @{
+                        int total = Model.TotalAndConcludedApplications.Select(x=>x.CountNo).FirstOrDefault() - Model.TotalAndConcludedApplications.Select(x=>x.CountNo).Last();
+                    }
+                    @foreach (var noOfApplicationByUser in Model.TotalAndConcludedApplications)
+                    {
+                        <li>
+                            <a>
+                                @noOfApplicationByUser.ColumnName
+                                <span class="pull-right text-green">@noOfApplicationByUser.CountNo</span>
+                            </a>
+                        </li>
+                    }
+                    <li>
+                        <a>
+                            Pending Applications
+                            <span class="pull-right text-green">@total</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var totalNoOfApplicationChart = am4core.create("totalNoOfApplicationChart", am4charts.PieChart);
+
+            // Add and configure Series
+            var totalNoOfApplicationPieSeries = totalNoOfApplicationChart.series.push(new am4charts.PieSeries());
+            totalNoOfApplicationPieSeries.dataFields.value = "countno";
+            totalNoOfApplicationPieSeries.dataFields.category = "name";
+
+            // Let's cut a hole in our Pie chart the size of 30% the radius
+            totalNoOfApplicationChart.innerRadius = am4core.percent(30);
+
+            // Put a thick white border around each Slice
+            totalNoOfApplicationPieSeries.slices.template.stroke = am4core.color("#fff");
+            totalNoOfApplicationPieSeries.slices.template.strokeWidth = 2;
+            totalNoOfApplicationPieSeries.slices.template.strokeOpacity = 1;
+            totalNoOfApplicationPieSeries.slices.template
+                // change the cursor on hover to make it apparent the object can be interacted with
+                .cursorOverStyle = [
+                    {
+                        "property": "cursor",
+                        "value": "pointer"
+                    }
+                ];
+
+            totalNoOfApplicationPieSeries.alignLabels = false;
+            totalNoOfApplicationPieSeries.labels.template.bent = false;
+            totalNoOfApplicationPieSeries.labels.template.text = "{value.percent.formatNumber('#.0')}%";
+            totalNoOfApplicationPieSeries.labels.template.radius = am4core.percent(-40);
+            totalNoOfApplicationPieSeries.labels.template.fill = am4core.color("white");
+            totalNoOfApplicationPieSeries.labels.template.relativeRotation = 90;
+
+            totalNoOfApplicationPieSeries.ticks.template.disabled = true;
+
+            // Create a base filter effect (as if it's not there) for the hover to return to
+            shadow = totalNoOfApplicationPieSeries.slices.template.filters.push(new am4core.DropShadowFilter);
+            shadow.opacity = 0;
+
+            // Create hover state
+            hoverState = totalNoOfApplicationPieSeries.slices.template.states.getKey("hover"); // normally we have to create the hover state, in this case it already exists
+
+            // Slightly shift the shadow and make it more prominent on hover
+            hoverShadow = hoverState.filters.push(new am4core.DropShadowFilter);
+            hoverShadow.opacity = 0.7;
+            hoverShadow.blur = 5;
+
+            // Add a legend
+            //statusCount.legend = new am4charts.Legend();
+
+            totalNoOfApplicationChart.data = $.parseJSON($("#totalNoOfApplicationCount").val());
+        });
+    </script>
+}
+@if (Model.NoOfApplicationsByUsers != null && Model.NoOfApplicationsByUsers.Count != 0)
+{
+
+
+    <div class="col-lg-4 col-xs-12">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">No. of Applications Created By Field Officers</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="chart-responsive">
+                            <div id="noOfApplicationByUserChart" style="width:100%; height:300px;"></div>
+                            <input id="NoOfApplicationsByUsers" type="hidden" value="@JsonConvert.SerializeObject(Model.NoOfApplicationsByUsers.Select(x => new { noofapplications = x.NoOfApplications, fullname = x.FullName }))" />
+                        </div>
+                        <!-- ./chart-responsive -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer no-padding">
+                <ul class="nav nav-pills nav-stacked">
+                    @{
+                        int total = 0;
+                    }
+                    @foreach (var noOfApplicationByUser in Model.NoOfApplicationsByUsers)
+                    {
+                        total += noOfApplicationByUser.NoOfApplications;
+                        <li>
+                            <a>
+                                @noOfApplicationByUser.FullName
+                                <span class="pull-right text-green">@noOfApplicationByUser.NoOfApplications</span>
+                            </a>
+                        </li>
+                    }
+                    <li>
+                        <a>
+                            Total No. of Applications
+                            <span class="pull-right text-green">@total</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+@if (Model.NoOfDelayedCases != null && Model.NoOfDelayedCases.Count != 0)
+{
+    <div class="col-lg-4 col-xs-12">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">Delayed Applications For More Than 7 Days.</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="chart-responsive">
+                            <div id="delayedCountChart" style="width: 100%; height:300px;"></div>
+                            <input id="delayedCount" type="hidden" value="@JsonConvert.SerializeObject(Model.NoOfDelayedCases.Select(x => new { delayedcount = x.CountNo, delayedby = x.ColumnName }))" />
+                        </div>
+                        <!-- ./chart-responsive -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer no-padding">
+                <ul class="nav nav-pills nav-stacked">
+                    @foreach (var delayed in Model.NoOfDelayedCases)
+                    {
+                        <li>
+                            <a href="/portal/application/list?statusID=@GetHierarchicalStatusID(delayed.ColumnName)&searchRoleID=@GetHierarchicalRoleID(delayed.ColumnName)&date=@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")">
+                                @delayed.ColumnName
+                                <span class="pull-right text-green">@delayed.CountNo</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <!-- /.footer -->
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            renderChart();
+        });
+        function renderChart() {
+            var delayedCount = am4core.create("delayedCountChart", am4charts.PieChart);
+
+            // Add and configure Series
+            var delayedCountPieSeries = delayedCount.series.push(new am4charts.PieSeries());
+            delayedCountPieSeries.dataFields.value = "delayedcount";
+            delayedCountPieSeries.dataFields.category = "delayedby";
+
+            // Let's cut a hole in our Pie chart the size of 30% the radius
+            delayedCount.innerRadius = am4core.percent(30);
+
+            // Put a thick white border around each Slice
+            delayedCountPieSeries.slices.template.stroke = am4core.color("#fff");
+            delayedCountPieSeries.slices.template.strokeWidth = 2;
+            delayedCountPieSeries.slices.template.strokeOpacity = 1;
+            delayedCountPieSeries.slices.template
+                // change the cursor on hover to make it apparent the object can be interacted with
+                .cursorOverStyle = [
+                    {
+                        "property": "cursor",
+                        "value": "pointer"
+                    }
+                ];
+
+            delayedCountPieSeries.alignLabels = false;
+            delayedCountPieSeries.labels.template.bent = false;
+            delayedCountPieSeries.labels.template.text = "{value.percent.formatNumber('#.0')}%";
+            delayedCountPieSeries.labels.template.radius = am4core.percent(-40);
+            delayedCountPieSeries.labels.template.fill = am4core.color("white");
+            delayedCountPieSeries.labels.template.relativeRotation = 90;
+
+            delayedCountPieSeries.ticks.template.disabled = true;
+
+            // Create a base filter effect (as if it's not there) for the hover to return to
+            shadow = delayedCountPieSeries.slices.template.filters.push(new am4core.DropShadowFilter);
+            shadow.opacity = 0;
+
+            // Create hover state
+            hoverState = delayedCountPieSeries.slices.template.states.getKey("hover"); // normally we have to create the hover state, in this case it already exists
+
+            // Slightly shift the shadow and make it more prominent on hover
+            hoverShadow = hoverState.filters.push(new am4core.DropShadowFilter);
+            hoverShadow.opacity = 0.7;
+            hoverShadow.blur = 5;
+
+            // Add a legend
+            //statusCount.legend = new am4charts.Legend();
+
+            delayedCount.data = $.parseJSON($("#delayedCount").val());
+        }
+    </script>
+}
+else
+{
+    if (Model.DashboardStatistics != null && Model.DashboardStatistics.Count != 0)
+    {
+        <div class="row">
+            @foreach (var statistic in Model.DashboardStatistics.Take(6))
+            {
+                <div class="col-lg-2 col-xs-12">
+                    <!-- small box -->
+                    <div class="small-box @ColorClass(statistic.ColumnName)">
+                        <div class="inner">
+                            <h3>@statistic.CountNo</h3>
+                            <p>@statistic.ColumnName</p>
+                        </div>
+                        <div class="icon">
+                            <i class="@IonClass(statistic.ColumnName)"></i>
+                        </div>
+                        <a href="/portal/application/list?statusID=@GetStatusID(statistic.ColumnName)&searchRoleID=@GetRoleID(statistic.ColumnName)" class="small-box-footer">
+                            More info
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+            @if (Model.DashboardStatistics != null && Model.DashboardStatistics.Count > 6)
+            {
+                foreach (var statistic in Model.DashboardStatistics.Skip(6).Take(6))
+                {
+                    <div class="col-lg-2 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box @ColorClass(statistic.ColumnName)">
+                            <div class="inner">
+                                <h3>@statistic.CountNo</h3>
+                                <p>@statistic.ColumnName</p>
+                            </div>
+                            <div class="icon">
+                                <i class="@IonClass(statistic.ColumnName)"></i>
+                            </div>
+                            <a href="/portal/application/list?statusID=@GetStatusID(statistic.ColumnName)&searchRoleID=@GetRoleID(statistic.ColumnName)" class="small-box-footer">
+                                More info
+                                <i class="fa fa-arrow-circle-right"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                }
+            }
+            @if (Model.DashboardStatistics != null && Model.DashboardStatistics.Count > 12)
+            {
+                foreach (var statistic in Model.DashboardStatistics.Skip(12).Take(6))
+                {
+                    <div class="col-lg-2 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box @ColorClass(statistic.ColumnName)">
+                            <div class="inner">
+                                <h3>@statistic.CountNo</h3>
+                                <p>@statistic.ColumnName</p>
+                            </div>
+                            <div class="icon">
+                                <i class="@IonClass(statistic.ColumnName)"></i>
+                            </div>
+                            <a href="/portal/application/list?statusID=@GetStatusID(statistic.ColumnName)&searchRoleID=@GetRoleID(statistic.ColumnName)" class="small-box-footer">
+                                More info
+                                <i class="fa fa-arrow-circle-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+            <div class="col-lg-2 col-xs-12">
+                <!-- small box -->
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>@Model.DashboardStatistics.Where(x => x.ColumnName == "Approved by RS").Select(x => x.CountNo).FirstOrDefault()</h3>
+                        <p>Pending in Finance</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-compass"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@functions {
+    public string ColorClass(string ColumnName)
+    {
+        string colorClass = ColumnName.Contains(StatusesEnum.Rejected.ToString()) ? "bg-red-gradient" :
+                                ColumnName.Contains(StatusesEnum.Submit.ToString()) ? "bg-aqua-gradient" :
+                                ColumnName.Contains(StatusesEnum.Approved.ToString()) ? "bg-green-gradient" :
+                                ColumnName.Contains(StatusesEnum.Completed.ToString()) ? "bg-olive" :
+                                ColumnName.Contains(RolesEnum.CEO.ToString()) ? "bg-purple" :
+                                ColumnName.Contains(RolesEnum.Committee.ToString()) ? "bg-maroon" :
+                                ColumnName.Contains("Field Officer") ? "bg-yellow" :
+                                ColumnName.Contains(RolesEnum.Finance.ToString()) ? "bg-blue" :
+                                ColumnName.Contains(RolesEnum.RS.ToString()) ? "bg-teal" :
+                                ColumnName == "No. of Applications" ? "bg-fuchsia" :
+                                "bg-yellow-gradient";
+        return colorClass;
+    }
+    public string IonClass(string ColumnName)
+    {
+        string ionClass = ColumnName.Contains(StatusesEnum.Rejected.ToString()) ? "ion ion-android-delete" :
+                               ColumnName.Contains(StatusesEnum.Submit.ToString()) ? "ion ion-edit" :
+                               ColumnName.Contains(StatusesEnum.Approved.ToString()) ? "ion ion-checkmark" :
+                               ColumnName.Contains(StatusesEnum.Completed.ToString()) ? "ion ion-briefcase" :
+                               ColumnName.Contains(RolesEnum.CEO.ToString()) ? "ion ion-person" :
+                               ColumnName.Contains(RolesEnum.Committee.ToString()) ? "ion ion-document" :
+                               ColumnName.Contains("Field Officer") ? "ion ion-person-add" :
+                               ColumnName.Contains(RolesEnum.Finance.ToString()) ? "ion ion-cash" :
+                               ColumnName.Contains(RolesEnum.RS.ToString()) ? "ion ion-eye" :
+                               ColumnName == "No. of Applications" ? "ion ion-bag" :
+                                "ion ion-stats-bar";
+        return ionClass;
+    }
+    public short? GetStatusID(string columnName)
+    {
+        short? statusID = (short?)null;
+        if (columnName.Contains("Approved"))
+            statusID = (short?)StatusesEnum.Approved;
+        if (columnName.Contains("Rejected"))
+            statusID = (short?)StatusesEnum.Rejected;
+        if (columnName.Contains("Completed"))
+            statusID = (short?)StatusesEnum.Completed;
+        if (columnName.Contains("Submitted"))
+            statusID = (short?)StatusesEnum.Submit;
+        return statusID;
+    }
+    public short? GetRoleID(string columnName)
+    {
+        short? roleID = (short?)null;
+        if (columnName.Contains("CEO"))
+            roleID = (short?)RolesEnum.CEO;
+        if (columnName.Contains("RS"))
+            roleID = (short?)RolesEnum.RS;
+        if (columnName.Contains("Committee"))
+            roleID = (short?)RolesEnum.Committee;
+        if (columnName.Contains("Finance"))
+            roleID = (short?)RolesEnum.Finance;
+        if (columnName.Contains("Head Field Officer"))
+            roleID = (short?)RolesEnum.HeadFieldWorker;
+        if (columnName.Contains("Field Officer"))
+            roleID = (short?)RolesEnum.FieldWorker;
+        if (columnName.Contains("Admin"))
+            roleID = (short?)RolesEnum.FieldWorker;
+        return roleID;
+    }
+    public short? GetHierarchicalRoleID(string columnName)
+    {
+        short? roleID = (short?)null;
+        if (columnName.Contains("RS"))
+            roleID = (short?)RolesEnum.Committee;
+        if (columnName.Contains("Committee"))
+            roleID = (short?)RolesEnum.FieldWorker;
+        if (columnName.Contains("Finance"))
+            roleID = (short?)RolesEnum.RS;
+        return roleID;
+    }
+    public short? GetHierarchicalStatusID(string columnName)
+    {
+        short? statusID = (short?)null;
+        if (columnName.Contains("RS"))
+            statusID = (short?)StatusesEnum.Approved;
+        if (columnName.Contains("Committee"))
+            statusID = (short?)StatusesEnum.Submit;
+        if (columnName.Contains("Finance"))
+            statusID = (short?)StatusesEnum.Approved;
+        return statusID;
+    }
+}

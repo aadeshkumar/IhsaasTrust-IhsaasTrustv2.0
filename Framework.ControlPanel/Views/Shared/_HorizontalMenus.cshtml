@@ -1,0 +1,83 @@
+﻿<ul class="nav navbar-nav">
+    <li class="active"><a href="/home">Home <span class="sr-only">(current)</span></a></li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Jobs <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Jobs" href="/admin/jobs/8">New Job</a></li>
+            <li><a parent="Jobs" href="/admin/batch-ready/21">Batch Ready</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Customers <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Customers" href="/Customer/CustomerTypes">Customer Types</a></li>
+            <li><a parent="Customers" href="/Customer/Customer">Customers</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Configurations <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Configurations" href="/admin/statuses/2">Status</a></li>
+            <li><a parent="Configurations" href="/admin/area-types/15">Area Types</a></li>
+            <li><a parent="Configurations" href="/admin/remove-types/16">Remove Types</a></li>
+            <li><a parent="Configurations" href="/admin/product-types/17">Product Types</a></li>
+            <li><a parent="Configurations" href="/admin/banks/3">Banks</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Products <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Products" href="/admin/brands/4">Brands</a></li>
+            <li><a parent="Products" href="/admin/wareshouses/6">Warehouses</a></li>
+            <li><a parent="Products" href="/admin/categories/5">Categories</a></li>
+            <li><a parent="Products" href="/admin/products/7">Products</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Inventory <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Inventory" href="/admin/vendors/9">Vendors</a></li>
+            <li><a parent="Inventory" href="/admin/warehouses/6">Warehouses</a></li>
+            <li><a parent="Inventory" href="/Inventory/PurchaseOrders">Purchase Orders</a></li>
+            <li><a parent="Inventory" href="/Inventory/Grns">Grns</a></li>
+            <li><a parent="Inventory" href="/Inventory/IssueProducts">Issue Products</a></li>
+            <li><a parent="Inventory" href="/admin/user-products/20">Worker Stock Level</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Account <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Account" href="/admin/companies/18">Companies</a></li>
+            <li><a parent="Account" href="/admin/audit-types/13">Field Worker</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Audit <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Audit" href="/admin/audit-types/10">Audit Types</a></li>
+            <li><a parent="Audit" href="/admin/questions/11">Questions</a></li>
+            <li><a parent="Audit" href="/admin/job-audits/12">Job Audit</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Reports <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a parent="Reports" href="/admin/installation-report-by-job/23">Installation Report By Job</a></li>
+            <li><a parent="Reports" href="/admin/installation-report-by-model/24">Installation Report By Model</a></li>
+            <li><a parent="Reports" href="/admin/installation-report-per-installer/25">Installation Report Per Installer</a></li>
+            <li><a parent="Reports" href="/admin/stock-on-hand-summary-by-warehouse/26">Stock On Hand Summary By Warehouse</a></li>
+            <li><a parent="Reports" href="/admin/stock-on-hand-summary-by-installer/27">Stock On Hand Summary By Installer</a></li>
+        </ul>
+    </li>
+</ul>
+
+<script>
+    $(document).ready(function () {
+        $(".nav.navbar-nav li").removeClass("active");
+        $("a[href='" + document.location.pathname + "']").parent().parent().parent().addClass("active");
+        var childLinkText = $("a[href='" + document.location.pathname + "']").text();
+        var parentLinkText = $("a[href='" + document.location.pathname + "']").attr("parent");
+        var breadcrumbs = '<li><a href="/home"><i class="fa fa-dashboard"></i> Home</a></li><li>' + parentLinkText + '</li><li class="active">' + childLinkText + '</li>';
+        $(".breadcrumb").html(breadcrumbs);
+    });
+</script>

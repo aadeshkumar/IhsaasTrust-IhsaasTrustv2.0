@@ -1,0 +1,133 @@
+﻿@using Framework.Shared.DataServices
+@using Newtonsoft.Json
+
+@model Framework.ControlPanel.Models.DashboardModel
+@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+@if (Model.StatusCount != null && Model.StatusCount.Count != 0)
+{
+    <div class="col-lg-4 col-xs-12">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">Applications Status</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="chart-responsive">
+                            <div id="statusCountChart" style="width: 100%; height:300px;"></div>
+                            <input id="StatusCount" type="hidden" value="@JsonConvert.SerializeObject(Model.StatusCount.Select(x => new { statuscount = x.StatusCount, statusname = x.StatusName }))" />
+                        </div>
+                        <!-- ./chart-responsive -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer no-padding">
+                <ul class="nav nav-pills nav-stacked">
+                    @foreach (var status in Model.StatusCount)
+                    {
+                        <li>
+                            <a>
+                                @status.StatusName
+                                <span class="pull-right text-green">@status.StatusCount</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <!-- /.footer -->
+        </div>
+    </div>
+
+}
+@if (Model.NoOfStream != null && Model.NoOfStream.Count != 0)
+{
+    <div class="col-lg-4 col-xs-12">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">No. of Stream</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="chart-responsive">
+                            <div id="noOfStreamChart" style="width:100%; height:300px;"></div>
+                            <input id="StreamCount" type="hidden" value="@JsonConvert.SerializeObject(Model.NoOfStream.Select(x => new { count = x.NoOfStream, stream = x.FieldName }))" />
+                        </div>
+                        <!-- ./chart-responsive -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer no-padding">
+                <ul class="nav nav-pills nav-stacked">
+                    @foreach (var status in Model.NoOfStream)
+                    {
+                        <li>
+                            <a>
+                                @status.FieldName
+                                <span class="pull-right text-green">@status.NoOfStream</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <!-- /.footer -->
+        </div>
+    </div>
+}
+@*<div class="row">
+        <div class="col-lg-4 col-xs-12">
+            <!-- small box -->
+            <div class="small-box bg-aqua-gradient">
+                <div class="inner">
+                    <h3>@Model.NoOfApplications</h3>
+                    <p>Total No. of Applications Created</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-clipboard"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-xs-12">
+            <div class="small-box bg-red-gradient">
+                <div class="inner">
+                    <h3>@Model.PendingInFinance</h3>
+                    <p>Pending in Finance</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-cash"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-xs-12">
+            <div class="small-box bg-green-gradient">
+                <div class="inner">
+                    <h3>@Model.InReviewOfCommittee</h3>
+                    <p>In Review of Committee</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-person-stalker"></i>
+                </div>
+            </div>
+        </div>
+    </div>*@

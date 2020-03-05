@@ -1,0 +1,72 @@
+.login-page {
+    background-color: #AFD13B;
+}
+
+.btn-primary {
+    background-color: #000;
+    border-color: #000;
+}
+
+.skin-blue .main-header .logo {
+    background-color: #AFD13B;
+    color: #fff;
+    border-bottom: 0 solid transparent;
+}
+
+.skin-blue .main-header li.user-header {
+    background-color: #AFD13B;
+}
+
+.box.box-danger {
+    border-top-color: #AFD13B;
+}
+
+.bg-black-btn {
+    background-color: #000;
+    color: #fff;
+}
+
+    .bg-black-btn:hover {
+        background-color: rgba(0,0,0,0.8);
+        color: #fff;
+    }
+
+.nav-tabs-custom > .nav-tabs > li.active {
+    border-top-color: #AFD13B;
+}
+
+.ins-det-back {
+    background-color: #000;
+    color: #fff;
+    margin-top: 4%;
+    padding: 5px;
+}
+
+    .ins-det-back h5 {
+        font-size: 16px;
+    }
+
+.activity {
+    background-color: #222d32;
+    padding: 5px;
+    color: #fff;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.decom input[type=text] {
+    border: none;
+    border-bottom: 2px solid #666;
+}
+
+.acn input {
+    width: 80%;
+    border: none;
+    border-bottom: 2px solid #666;
+}
+
+.bottom-text p {
+    text-align: center;
+}

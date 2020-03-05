@@ -1,0 +1,384 @@
+﻿@using Framework.Shared.DataServices;
+@{
+    ViewBag.Title = "Main";
+    Layout = "~/Views/Shared/_Login.cshtml";
+}
+<style>
+    .navbar-brand img {
+        transform: translateX(-50%);
+        left: 14%;
+        position: absolute;
+        top: -7%;
+    }
+</style>
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7">
+
+            </div>
+            <div class="col-md-5 loginbuttons">
+                <a href="@Url.Action("Login","Authentication")" class="btn btn-primary btn-block btn-flat" id="login-btn">Login</a>
+                </div>
+        </div>
+    </div>
+</section>
+
+
+<div class="container">
+    <div class="row">
+        <section id="sectiongap">
+            <div id="about" class="section">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="section-title">
+                                <h2 class="title">Welcome to Charity</h2>
+                                <p class="sub-title">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            </div>
+                            <div class="about-content">
+                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                                <p id="Rdmore">Read More</p>
+
+                            </div>
+                        </div>
+                        <div class="col-md-offset-1 col-md-7">
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/jE-38Nd1BCw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+
+<section>
+    <div id="numbers" class="section">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-md-3 col-sm-6 numberbox" style=" color: #24bdc9; height: 150px">
+                    <div class="number">
+
+                        <h3>200</h3>
+                        <span>Registerd Organizations</span>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6 numberbox" style=" color:#24bdc9; height:150px">
+                    <div class="number">
+                        <i class="fa fa-heartbeat"></i>
+                        <h3>5K</h3>
+                        <span>Total Users</span>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6 numberbox" style=" color:#24bdc9; height:150px">
+                    <div class="number">
+                        <i class="fa fa-money"></i>
+                        <h3>100K+</h3>
+                        <span>Helped</span>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6 numberbox" style=" color:#24bdc9; height:150px">
+                    <div class="number">
+                        <i class="fa fa-handshake-o"></i>
+                        <h3>357</h3>
+                        <span>Volunteers</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="col-md-12 col-md-offset-2">
+        <div class="section-title text-center">
+            <h2 class="title">Our Clients</h2>
+            <p class="sub-title">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div id="causes" class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="causes">
+                        <div class="causes-img">
+                            <img src="~/Content2/img/post-1.jpg" alt="">
+                        </div>
+                        <div class="causes-content">
+                            <h3>Possit nostro aeterno eu vis, ut cum quem reque</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            <p>Donate Now</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="causes">
+                        <div class="causes-img">
+                            <img src="~/Content2/img/post-2.jpg" alt="">
+                        </div>
+                        <div class="causes-content">
+                            <h3>Vix fuisset tibique facilisis cu. Justo accusata ius at</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            <p>Donate Now</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="causes">
+                        <div class="causes-img">
+                            <img src="~/Content2/img/post-3.jpg" alt="">
+                        </div>
+                        <div class="causes-content">
+                            <h3>Possit nostro aeterno eu vis, ut cum quem reque</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            <p>Donate Now</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section>
+    <div id="causes" class="section">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="causes">
+                        <div class="causes-img">
+                            <img src="~/Content2/img/post-4.jpg" alt="">
+                        </div>
+                        <div class="causes-content">
+                            <h3>Possit nostro aeterno eu vis, ut cum quem reque</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            <p>Donate Now</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="causes">
+                        <div class="causes-img">
+                            <img src="~/Content2/img/post-5.jpg" alt="">
+                        </div>
+                        <div class="causes-content">
+                            <h3>Vix fuisset tibique facilisis cu. Justo accusata ius at</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            <p>Donate Now</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="causes">
+                        <div class="causes-img">
+                            <img src="~/Content2/img/post-6.jpg" alt="">
+                        </div>
+                        <div class="causes-content">
+                            <h3>Possit nostro aeterno eu vis, ut cum quem reque</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            <p>Donate Now</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section services-section hero-wrap">
+    <div class="container">
+        <div class="row justify-content-center mb-5 pb-5">
+            <div class="col-md-7">
+                <h5 class="text-center">Services</h5>
+                <h2 class="mb-4 text-center">Why choose us</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 d-flex align-self-stretch hero-wrap">
+                <div class="media block-6 services d-block text-center">
+                    <div class="d-flex justify-content-center"><div class="icon"><span class="flaticon-guarantee"></span></div></div>
+                    <div class="media-body p-2 mt-3">
+                        <h3 class="heading">100% Uptime Guarantee</h3>
+                        <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex align-self-stretch hero-wrap">
+                <div class="media block-6 services d-block text-center">
+                    <div class="d-flex justify-content-center"><div class="icon"><span class="flaticon-shield"></span></div></div>
+                    <div class="media-body p-2 mt-3">
+                        <h3 class="heading">Safe and Secured</h3>
+                        <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex align-self-stretch hero-wrap">
+                <div class="media block-6 services d-block text-center">
+                    <div class="d-flex justify-content-center"><div class="icon"><span class="flaticon-support"></span></div></div>
+                    <div class="media-body p-2 mt-3">
+                        <h3 class="heading">Our Dedicated Support</h3>
+                        <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="hero-wrap">
+    <div class="row justify-content-center mb-5 pb-5">
+        <div class="col-md-7 text-center heading-section">
+            <br />
+            <span class="heading">Customer Says</span>
+            <h2 class="mb-4">Our satisfied customer says</h2>
+            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="item col-md-3 col-12">
+                <div class="testimony-wrap p-4 pb-5">
+                    <div class="user-img mb-5" style="background-image: url(~/Content2/images/person_1.jpg)">
+                        <span class="quote d-flex align-items-center justify-content-center">
+                            <i class="icon-quote-left"></i>
+                        </span>
+                    </div>
+                    <div class="text">
+                        <p class="mb-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                        <p class="name">Dennis Green</p>
+                        <span class="position">Marketing Manager</span>
+                    </div>
+                </div>
+            </div>
+            <div class="item col-md-3 col-12">
+                <div class="testimony-wrap p-4 pb-5">
+                    <div class="user-img mb-5" style="background-image: url(images/person_2.jpg)">
+                        <span class="quote d-flex align-items-center justify-content-center">
+                            <i class="icon-quote-left"></i>
+                        </span>
+                    </div>
+                    <div class="text">
+                        <p class="mb-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                        <p class="name">Dennis Green</p>
+                        <span class="position">Interface Designer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="item col-md-3 col-12">
+                <div class="testimony-wrap p-4 pb-5">
+                    <div class="user-img mb-5" style="background-image: url(images/person_3.jpg)">
+                        <span class="quote d-flex align-items-center justify-content-center">
+                            <i class="icon-quote-left"></i>
+                        </span>
+                    </div>
+                    <div class="text">
+                        <p class="mb-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                        <p class="name">Dennis Green</p>
+                        <span class="position">UI Designer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="item col-md-3 col-12">
+                <div class="testimony-wrap p-4 pb-5">
+                    <div class="user-img mb-5" style="background-image: url(~/Content2/images/person_4.jpg)">
+                        <span class="quote d-flex align-items-center justify-content-center">
+                            <i class="icon-quote-left"></i>
+                        </span>
+                    </div>
+                    <div class="text">
+                        <p class="mb-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                        <p class="name">Dennis Green</p>
+                        <span class="position">Web Developer</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<section class="ftco-section services-section hero-wrap ">
+    <br />
+    <br />
+    <div class="container col-md-12" style="background-color:darkturquoise">
+        <div class="row justify-content-center mb-5 pb-5 contactgap">
+            <div class="col-md-7">
+                <h1 class="text-center" style="color:white; padding-top: 10px;">Contact US</h1>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="ftco-footer-widget mb-4">
+                        <h2 class="ftco-heading-2" style="color:white">Trust Portal</h2>
+                        <p style="color:white">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                        <p class="mt-4"><a href="#" class="btn btn-primary p-3" id="touchbtn">Get in touch</a></p>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="ftco-footer-widget mb-4 ml-md-5">
+                        <h2 class="ftco-heading-2" style="color:white">Unseful Links</h2>
+                        <ul class="list-unstyled left">
+                            <li><a href="#" class="py-2 d-block" style="color:white">Servers</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Windos Hosting</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Cloud Hosting</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">OS Servers</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Linux Servers</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="ftco-footer-widget mb-4">
+                        <h2 class="ftco-heading-2" style="color:white">Navigational</h2>
+                        <ul class="list-unstyled left">
+                            <li><a href="#" class="py-2 d-block" style="color:white">Home</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Domain</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Hosting</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">About</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Blog</a></li>
+                            <li><a href="#" class="py-2 d-block" style="color:white">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="ftco-footer-widget mb-4">
+                        <div class="block-23 mb-3">
+                            <ul>
+                                <li style="color:white"><span class="icon icon-map-marker"></span><span class="text">203 Fake St. Mountain View, San Francisco, California, USA</span></li>
+                                <li style="color:white"><a href="#"><span class="icon icon-phone"></span><span class="text">+2 392 3929 210</span></a></li>
+                                <li style="color:white"><a href="#"><span class="icon icon-envelope"></span><span class="text">info@yourdomain.com</span></a></li>
+                                <li style="color:white"><span class="icon icon-clock-o"></span><span class="text">Saturday &mdash; Sunday 8:00am - 5:00pm</span></li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p style="color:white">
+                        Copyright &copy;
+                        <script>document.write(new Date().getFullYear());</script> All rights reserved!  This Project is made By <a href="http://www.bitscollision.com/" target="_blank" style="color:white">Bits Collision</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

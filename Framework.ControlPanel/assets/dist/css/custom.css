@@ -1,0 +1,77 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+.home_color_background{
+    background-color: #194482;
+}
+.ihsaas_logo{
+    text-align: center;
+}
+.login_heading h2{
+    text-align: center;
+    color: #ffffff;
+}
+.input-group{
+    min-width: 240px;
+    max-width: 350px;
+    margin: auto;
+}
+.input-group input{
+    color: #ffffff;
+    font-weight: 500;
+    background-color: #194482;
+}
+.input-group input::placeholder{
+    color: #ffffff;
+    font-weight: 500;
+}
+#remember{
+    margin: auto;
+}
+.btn-center button{
+    margin: auto;
+    margin-top: 3%;
+}
+#login-btn{
+    min-width: 180px;
+    max-width: 240px;
+    background-color: #ffffff;
+    color: #194482;
+    border-radius: 5px;
+    border: 1px solid #194482;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+/* Dashboard CSS */
+
+.skin-blue .main-header .logo {
+    background-color: #194482;
+    color: #fff;
+    border-bottom: 0 solid transparent;
+}
+
+.main-header .logo {
+    -webkit-transition: width .3s ease-in-out;
+    -o-transition: width .3s ease-in-out;
+    transition: width .3s ease-in-out;
+    display: block;
+    float: left;
+    height: 60px;
+    font-size: 20px;
+    line-height: 50px;
+    text-align: center;
+    width: 230px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    padding: 0 15px;
+    font-weight: 300;
+    overflow: hidden;
+}
+.logo-mini .logo-lg img{
+    width: 70px;
+    height: 70px;
+}
+.logo-lg{
+    font-size:15px;
+}

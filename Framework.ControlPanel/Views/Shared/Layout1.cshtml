@@ -1,0 +1,217 @@
+﻿@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Application.Services
+@using Framework.Shared.DataServices
+<!DOCTYPE html>
+<html style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Cache-Control" content="non-cache, no-store, must-revalidate">
+    <title>@ViewBag.Title</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="/assets/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/bower_components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/assets/bower_components/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="/assets/dist/css/AdminLTE.css">
+    <link rel="stylesheet" href="/assets/dist/css/skins/skin-blue.css">
+    <link rel="stylesheet" href="/assets/bower_components/morris.js/morris.css">
+    <link rel="stylesheet" href="/assets/bower_components/jvectormap/jquery-jvectormap.css">
+    <link rel="stylesheet" href="/assets/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="/assets/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" href="/assets/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link href="~/assets/plugins/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="~/assets/ihsaastrust.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <link href="/assets/dist/img/icon.png" rel="icon" />
+
+
+    <link href="https://www.jqueryscript.net/demo/Dynamic-Animated-Timeline-Slider/jquery.roadmap.min.css?v2" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+
+    @Scripts.Render("~/bundles/jquery")
+</head>
+<body class="hold-transition skin-blue sidebar-mini" style="min-height:600px !important;">
+    @{
+        string displayName = Authentication.Instance.User == null ? "" : Authentication.Instance.User.DisplayName;
+        string pictureURL = !string.IsNullOrEmpty(Authentication.Instance.User.PictureURL) ? Authentication.Instance.User.PictureURL : "/assets/dist/img/default-50x50.gif";
+        List<Notification> notifications = ApplicationServices.Instance.GetNotifications(Authentication.Instance.User.UserID);
+    }
+    <div class="wrapper" style="background: #eee;">
+
+        <header class="main-header" style="background-color: #194482;">
+            <!-- Logo -->
+            <a href="/home/" class="logo" style="border-right: 1px solid #ddd;border-bottom:1px solid; height:50px;text-align:center;">
+                <!-- mini logo for sidebar mini 50x50 pixels -->
+                @*<span class="logo-mini"><img src="/assets/dist/img/logo.png" alt="Logo" style="width: 40px; height:40px;" /></span>*@
+                <!-- logo for regular state and mobile devices -->
+                <span class="logo-lg" style="font-size:15px;"><img src=@pictureURL alt="Logo" style="width: 50px; height:50px;" />@Authentication.Instance.User.OrganizationName</span>
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top" style="background:#194482 !important;">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                </a>
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <!-- Notifications: style can be found in dropdown.less -->
+                        <li class="dropdown notifications-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-bell-o"></i>
+                                <span class="label label-warning">@notifications.Count</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">You have @notifications.Count notifications</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu">
+                                        @foreach (Notification noti in notifications)
+                                        {
+                                            <li>
+                                                <a href="#" onclick="showNotification(@noti.NotificationID);">
+                                                    <i class="fa fa-users text-aqua"></i> @noti.Subject
+                                                </a>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </li>
+                                <li class="footer"><a href="#">View all</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <img src="@pictureURL" class="user-image" alt="User Image">
+                                <span class="hidden-xs">@displayName</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- User image -->
+                                <li class="user-header">
+                                    <img src="@pictureURL" class="img-circle" alt="User Image">
+                                    <p>
+                                        @displayName
+                                        <small>@DateTime.Now.ToString("dd-MMM-yyyy hh:mm:ss")</small>
+                                    </p>
+                                </li>
+                                <!-- Menu Footer-->
+                                <li class="user-footer">
+                                    <div class="pull-right">
+                                        <a href="/Authentication/Logout" class="btn btn-default btn-flat">Sign out</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <aside class="main-sidebar" style="background:#222d32;">
+            @*@{Html.RenderAction("Menus", "Home");}*@
+            @Html.Partial("_LeftMenus")
+        </aside>
+        <div class="content-wrapper" style="min-height:600px !important;">
+
+            @RenderBody()
+
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <div class="pull-right hidden-xs">
+                <b>Version</b> 2.4.0
+            </div>
+            <strong>
+                Copyright &copy;
+                <script type="text/javascript">document.write(new Date().getFullYear());</script>
+                <a href="#">Powered By Bits Collision</a>
+            </strong> All rights reserved.
+        </footer>
+    </div>
+    <div class="modal modal fade in" id="modal-noti" style="padding-right: 17px; background:white;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" onclick="exitNotification()" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-content" id="modalcontent">
+
+            </div>
+            <!-- /.modal-content -->
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+    </div>
+    <!-- ./wrapper -->
+</body>
+<!-- Include jQuery Roadmap Plugin -->
+<script src="https://www.jqueryscript.net/demo/Dynamic-Animated-Timeline-Slider/jquery.roadmap.js?v2" type="text/javascript"></script>
+<script src="/assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- Morris.js charts -->
+<script src="/assets/bower_components/raphael/raphael.min.js"></script>
+<!-- jvectormap -->
+<script src="/assets/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+<script src="/assets/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+<!-- daterangepicker -->
+<script src="/assets/bower_components/moment/min/moment.min.js"></script>
+<script src="/assets/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+<!-- datepicker -->
+<script src="/assets/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<!-- Bootstrap WYSIHTML5 -->
+<script src="/assets/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+<!-- Slimscroll -->
+<script src="/assets/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="/assets/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="/assets/dist/js/adminlte.min.js"></script>
+<script src="~/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="~/Scripts/CPSiteJavaScript.js"></script>
+<script type="text/javascript">
+
+    function exitNotification() {
+        $("#modal-noti").hide();
+    }
+    function showNotification(NotificationID) {
+        variables = {
+            NotificationID: NotificationID
+        }
+        $.ajax({
+            data: variables,
+            url: "/Home/GetNotification",
+            type: "GET"
+
+        }).done(function (data) {
+            $("#modalcontent").html(data);
+            $("#modal-noti").show();
+
+        })
+    }
+    //function isEmpty(value) {
+    //    return (value == null || value.length === 0);
+    //}
+    //function SendSMS(mobileno, message) {
+    //    var request = new XMLHttpRequest()
+    //    request.open('GET', 'https://sendpk.com/api/sms.php?username=923343380614&password=5294&sender=IhssasTrust&mobile=' + mobileno + '&message=' + message, true)
+    //    request.onload = function () {
+    //        // Begin accessing JSON data here
+    //        var data = JSON.parse(this.response)
+    //    }
+    //    request.send()
+    //}
+
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NEXGG2V2VG"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-NEXGG2V2VG');
+</script>
+</html>

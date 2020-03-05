@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Framework.ControlPanel",
+    "\\Framework.ControlPanel\\Controllers",
+    "\\Framework.ControlPanel\\Views",
+    "\\Framework.ControlPanel\\Views\\Home",
+    "\\Framework.ControlPanel\\Views\\Shared",
+    "\\Framework.Shared",
+    "\\Framework.Shared\\DataServices",
+    "\\Framework.Shared\\DataServices\\PetaPoco",
+    "\\Framework.Shared\\DataServices\\PetaPoco\\Generated"
+  ],
+  "SelectedNode": "\\Framework.ControlPanel\\Views\\Shared\\_Layout.cshtml",
+  "PreviewInSolutionExplorer": false
+}

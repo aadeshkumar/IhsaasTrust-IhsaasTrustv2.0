@@ -1,0 +1,498 @@
+﻿@using Framework.Shared.DataServices
+@using Framework.ControlPanel.Models
+@using Framework.ControlPanel.CommonCode.Helpers;
+@using Framework.Shared.Enums;
+@using Framework.Application.Services;
+@using Framework.ControlPanel.Controllers;
+@model ApprovalModel
+@{
+    ViewBag.Title = "Manage Approval";
+    List<int> applicationIDs = new List<int>();
+    short statusID = Authentication.Instance.User.RoleID == (short)RolesEnum.Finance ? (short)StatusesEnum.Completed : (short)StatusesEnum.Approved;
+    
+}
+
+<section class="content-header">
+    <h1>
+        Manage Approval
+    </h1>
+    <ol class="breadcrumb"></ol>
+</section>
+<hr />
+<input type="hidden" id="UserID" value="@(Authentication.Instance.User.UserID)" />
+<input type="hidden" id="DateTime" value="@DateTime.Now" />
+
+<section class="content container-fluid">
+    <div class="col-md-12">
+        <div class="col-md-6 col-sm-12">
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                Please don't refresh the page, while verifying CNIC.<br />
+                This process will take 2 - 3 minutes.<br />
+                You can't send more than 1 verification request at a time.
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            <div class="alert alert-info alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-ban"></i> Steps of Verification</h4>
+                Request for Verification
+                <i class="fa fa-fw fa-arrow-right"></i>
+                Please wait...
+                <i class="fa fa-fw fa-arrow-right"></i>
+                Ihsaas CNIC Verification App will verify the CNIC
+                <i class="fa fa-fw fa-arrow-right"></i>
+                Verified/Failed with Response<br/>
+                Note: Ihsaas CNIC Verification should be running and have credit balance.
+            </div>
+        </div>
+    </div>
+    <div class="panel table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ApplicationID</th>
+                    <th>Applicant Name</th>
+                    <th>CNIC</th>
+                    <th>Contact No.</th>
+                    <th>Approved By</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    @if (Authentication.Instance.User.RoleID == (short)RolesEnum.RS)
+                    {
+                        <th>Submitted By</th>
+                    }
+                    <th>Approve</th>
+                    <th>Reject</th>
+                    @if (Authentication.Instance.User.RoleID != (short)RolesEnum.CEO)
+                    {
+                        <th>Escalate</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Authentication.Instance.User.RoleID != (short)RolesEnum.RS)
+                {
+                    if (Model.ApprovalList != null && Model.ApprovalList.Count != 0)
+                    {
+                        foreach (var item in Model.ApprovalList.OrderBy(x => x.ApplicationID))
+                        {
+                            int applicationCount = Model.ApprovalList.Where(x => x.ApplicationID == item.ApplicationID).Count();
+                            var cnicVerification = (Model.CNICVerifications != null && Model.CNICVerifications.Count != 0) ? Model.CNICVerifications.Where(x => x.ApplicationID == item.ApplicationID && x.CNIC == item.CNIC).FirstOrDefault() : null;
+                            <tr rel-application="@item.ApplicationID">
+                                <td>
+                                    <a href="/portal/application/create?applicationID=@item.ApplicationID">
+                                        @item.ApplicationID
+                                    </a>
+                                </td>
+                                <td>@item.ApplicantName</td>
+                                <td>
+                                    @item.CNIC<br />
+                                    @if (cnicVerification != null)
+                                    {
+                                        string labelClass = cnicVerification.StatusID == 11 ? "label-primary" :
+                                                    cnicVerification.StatusID == 12 ? "label-success" : "label-danger";
+                                        string status = cnicVerification.StatusID == 11 ? "Please wait..." :
+                                                    cnicVerification.StatusID == 12 ? "Verified" : "Invalid CNIC";
+                                        <div style="margin:auto;">
+                                            <a cnic="@item.CNIC" application-id="@item.ApplicationID" disabled="disabled">
+                                                <span class="label @labelClass">@status</span>
+                                                <span class="label @labelClass">@cnicVerification.ResponseText</span>
+                                            </a>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div style="margin:auto;">
+                                            <a style="cursor: pointer;" cnic="@item.CNIC" application-id="@item.ApplicationID" onclick="CNICVerification(this,@item.ApplicationID,@item.CNIC);">
+                                                <span class="label label-warning">Request for Verification</span>
+                                                <span el-id="responseCNIC"></span>
+                                            </a>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@item.ContactNo</td>
+                                <td>@item.CreatedBy</td>
+                                <td>@item.CreatedOn</td>
+                                <td>@item.Status</td>
+                                @if (!applicationIDs.Contains(item.ApplicationID))
+                                {
+                                    <td style="vertical-align:middle;">
+                                        @if (Authentication.Instance.User.RoleID == (short)RolesEnum.Finance && cnicVerification != null && cnicVerification.StatusID == 12)
+                                        {
+                                            <input type="button" id="btnApprove" class="btn btn-success" value="Approve" data-toggle="modal" data-target="#modal-approve" onclick="SetVariable(@item.ApplicationID,@statusID,'@item.ApplicantName','@item.CNIC','@item.ContactNo');">
+                                        }
+                                        else
+                                        {
+                                            string hideClass = string.Empty;
+                                            if (Authentication.Instance.User.RoleID == (short)RolesEnum.Finance)
+                                            {
+                                                hideClass = "style=display:none";
+                                            }
+                                            <input app-id="@item.ApplicationID" @hideClass type="button" id="btnApprove" class="btn btn-success" value="Approve" data-toggle="modal" data-target="#modal-approve" onclick="SetVariable(@item.ApplicationID,@statusID,'@item.ApplicantName','@item.CNIC','@item.ContactNo');">
+                                        }
+                                    </td>
+                                    <td style="vertical-align:middle;">
+                                        <input type="button" id="btnReject" class="btn btn-danger" value="Reject" data-toggle="modal" data-target="#modal-reject" onclick="SetVariable(@item.ApplicationID,@((short)StatusesEnum.Rejected),'@item.ApplicantName','@item.CNIC','@item.ContactNo');">
+                                    </td>
+                                    if (Authentication.Instance.User.RoleID != (short)RolesEnum.CEO)
+                                    {
+                                        <td style="vertical-align:middle;">
+                                            <input type="button" id="btnEscalate" class="btn btn-primary" value="Escalate" data-toggle="modal" data-target="#modal-escalate" onclick="SetVariable(@item.ApplicationID,@((short)StatusesEnum.Approved),'@item.ApplicantName','@item.CNIC','@item.ContactNo');">
+                                        </td>
+                                    }
+                                }
+                            </tr>
+                            applicationIDs.Add(item.ApplicationID);
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10">No approval request!</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    if (Model.ApprovalList != null && Model.ApprovalList.Count != 0)
+                    {
+                        foreach (var item in Model.ApprovalList.UniqueBy(x => x.ApplicationID).OrderBy(x => x.ApplicationID))
+                        {
+                            int applicationCount = Model.ApprovalList.Where(x => x.ApplicationID == item.ApplicationID).Count();
+                            <tr rel-application="@item.ApplicationID">
+                                <td>
+                                    <a href="/portal/application/create?applicationID=@item.ApplicationID">
+                                        @item.ApplicationID
+                                    </a>
+                                </td>
+                                <td>@item.ApplicantName</td>
+                                <td>@item.CNIC</td>
+                                <td>@item.ContactNo</td>
+                                <td>
+                                    @foreach (var createdBy in Model.ApprovalList.Where(x => x.ApplicationID == item.ApplicationID).Select(x => x.CreatedBy).ToList())
+                                    {
+                                        <strong>
+                                            @createdBy
+                                        </strong>
+                                        <br />
+                                    }
+                                </td>
+                                <td>@item.CreatedOn</td>
+                                <td>@item.Status</td>
+                                @if (Authentication.Instance.User.RoleID == (short)RolesEnum.RS)
+                                {
+                                    <td>@item.InitiallyCreatedBy</td>
+                                }
+                                @if (Model.ApprovalList.Where(x => x.ApplicationID == item.ApplicationID).Count() == 2)
+                                {
+                                    <td style="vertical-align:middle;">
+                                        <input type="button" id="btnApprove" class="btn btn-success" value="Approve" data-toggle="modal" data-target="#modal-approve" onclick="SetVariable(@item.ApplicationID,@statusID,'@item.ApplicantName','@item.CNIC','@item.ContactNo');">
+                                    </td>
+                                    <td style="vertical-align:middle;">
+                                        <input type="button" id="btnReject" class="btn btn-danger" value="Reject" data-toggle="modal" data-target="#modal-reject" onclick="SetVariable(@item.ApplicationID,@((short)StatusesEnum.Rejected),'@item.ApplicantName','@item.CNIC','@item.ContactNo');">
+                                    </td>
+                                    <td style="vertical-align:middle;">
+                                        <input type="button" id="btnEscalate" class="btn btn-primary" value="Escalate" data-toggle="modal" data-target="#modal-escalate" onclick="SetVariable(@item.ApplicationID,@((short)StatusesEnum.Approved),'@item.ApplicantName','@item.CNIC','@item.ContactNo');">
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td colspan="3" style="vertical-align:middle;text-align:center;width:100px;background:#b6ff00">
+                                        @Model.ApprovalList.Where(x => x.ApplicationID == item.ApplicationID).Count() out of 2 committee members approved this application. You can approve application once all committee members will approve it.
+                                    </td>
+                                }
+                            </tr>
+                            applicationIDs.Add(item.ApplicationID);
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10">No approval request!</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div id="successAlert" class="alert alert-success alert-dismissible" style="display:none;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-check"></i> Alert!</h4>
+        <span id="successMessage"></span>
+    </div>
+    <div id="errorAlert" class="alert alert-danger alert-dismissible" style="display:none;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+        <span id="errorMessage"></span>
+    </div>
+</section>
+
+<div class="modal modal-success fade in" id="modal-approve" style="padding-right: 17px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Approve Application - Approval Request</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>Reason:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <input class="form-control approval-text" type="text" id="ApproveReason" name="ApproveReason" style="height:150px;" required="required" />
+                        </div>
+                    </div>
+                    @if (Authentication.Instance.User.RoleID == (short)RolesEnum.Finance)
+                    {
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Amount:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input class="form-control approval-text" type="number" id="ApproveAmount" name="ApproveAmount" style="height:20px;" required="required"/>
+                            </div>
+                        </div>
+                    }
+                    @if (Authentication.Instance.User.RoleID == (short)RolesEnum.RS)
+                    {
+                        <br />
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Mufti Sahib Recommendation:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <select class="form-control" id="MuftiSahibRecommendation" name="MuftiSahibRecommendation">
+                                    <option value="Select">Select</option>
+                                    <option value="Sadqat">Sadqat</option>
+                                    <option value="Zakat">Zakat</option>
+                                </select>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                <button type="submit" onclick="ApprovalStatus(1, 'ApproveReason','ApproveAmount');" class="btn btn-outline">Approve</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal modal-danger fade in" id="modal-reject" style="padding-right: 17px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Reject Application - Approval Request</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>Reason:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <input class="form-control approval-text" type="text" id="RejectReason" name="RejectReason" style="height:150px;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                <button type="button" onclick="ApprovalStatus(2, 'RejectReason');" class="btn btn-outline">Reject</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal modal-info fade in" id="modal-escalate" style="padding-right: 17px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Escalate Application - Approval Request</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>Escalate To:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <select id="EscalateTo" class="form-control">
+                                @foreach (var item in Model.CEO)
+                                {
+                                    <option value="@item.UserID">@item.FullName (@item.Email)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>Reason:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <input class="form-control approval-text" type="text" id="EscalateReason" name="EscalateReason" style="height:150px;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                <button type="button" onclick="ApprovalStatus(3, 'EscalateReason');" class="btn btn-outline">Escalate</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<script type="text/javascript">
+    var variablesMail = {};
+    function ApprovalStatus(isApprovalRequest, reasonID, amountID) {
+        var confirmMessage = "";
+        var message = "";
+        var reason = $("#" + reasonID).val();
+        var amount = $("#" + amountID).val();
+        variables.reason = reason;
+        variables.recommendation = $("#MuftiSahibRecommendation").val() == undefined ? "" : $("#MuftiSahibRecommendation").val();
+        variables.amount = amount;
+
+        if (isApprovalRequest == 1) {
+            confirmMessage = "Are you sure you want to approve?";
+            message = "Your application is successfully approved!";
+        }
+        else if (isApprovalRequest == 2) {
+            confirmMessage = "Are you sure you want to reject?"
+            message = "Your application is successfully rejected!";
+        }
+        else {
+            variables.escalateTo = $("#EscalateTo").val();
+            confirmMessage = "Are you sure you want to escalate?"
+            message = "Your application is successfully escalated!";
+        }
+        var subject = "";
+        if (isApprovalRequest == 1) {
+            subject = "Application approval notification";
+        }
+        else if (isApprovalRequest == 2) {
+            subject = "Application rejection notification";
+        }
+        else {
+            subject = "Application escalate notification";
+        }
+        variablesMail = {
+            UserID: $("#UserID").val(),
+            Subject: subject,
+            FieldOfficer: '@Authentication.Instance.User.DisplayName (@(((RolesEnum)Authentication.Instance.User.RoleID).ToString()))',
+            ApplicantName: variables.applicantName,
+            CNIC: variables.cnic,
+            ContactNo: variables.contactNo,
+            ApplicationID: variables.applicationID,
+            RoleID: '@Authentication.Instance.User.RoleID',
+            ApprovalRequest: isApprovalRequest,
+            Reason: reason
+        }
+        //if (confirm(message)) {
+        $.ajax({
+            type: "POST",
+            url: "/Application/ApprovalStatus",
+            data: variables
+        }).done(function (data) {
+            if (data == "success") {
+                ShowSuccessMessage(message);
+                $("[rel-application='" + variables.applicationID + "']").fadeOut(200);
+                $("[data-dismiss]").click();
+                $.ajax({
+                    type: "POST",
+                    url: "/Application/SendMail",
+                    data: variablesMail
+                });
+                //var smsVariables;
+                //smsVariables = {
+                //    UserID: $("#UserID").val(),
+                //    mobileno: 923132291468,
+                //    MessageText: variablesMail.Subject + ' at ' + $("#DateTime").val() + '. Visit ' + 'http://bitscollision-001-site1.etempurl.com/application?applicationID=' + applicationID + ' to view it.'
+                //}
+                //$.ajax({
+                //    type: "POST",
+                //    url: "/Application/SendSMS",
+                //    data: smsVariables
+                //});
+            }
+        });
+        //}
+    }
+    var variables = {};
+    function SetVariable(applicationID, statusID, applicantName, cnic, contactNo) {
+        variables = {};
+        variables = {
+            applicationID: applicationID,
+            statusID: statusID,
+            applicantName: applicantName,
+            cnic: cnic,
+            contactNo: contactNo
+        };
+    }
+    function CNICVerification(item, applicationID, CNIC) {
+        $(item).attr("disabled", "disabled");
+        $(item).children().first().html("It'll take at least 1 minute");
+        setTimeout(function () {
+            $.ajax({ type: "GET", url: "/ihsaasapi/cnicverification?applicationID=" + applicationID + "&cnic=" + CNIC })
+                .done(function (data) {
+                    $(item).children().removeClass("label-warning");
+                    $(item).children().addClass("label-primary");
+                    $(item).children().first().html(data.Response);
+                    if (data.Status == "Success") {
+                        var cnicVerificationInterval = setInterval(function () {
+                            $.ajax({ type: "GET", url: "/ihsaasapi/getcnicverification?applicationID=" + applicationID + "&cnic=" + CNIC }).done(function (data) {
+                                if (data && data.Status && data.Response) {
+                                    if (data.Status == "Verified") {
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().first().removeClass("label-primary");
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().first().addClass("label-success");
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().last().addClass("label-success");
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().first().html(data.Status);
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().last().html(data.Response);
+                                        $("[app-id='" + applicationID + "']").css("display", "block");
+                                        clearInterval(cnicVerificationInterval);
+                                    }
+                                    if (data.Status == "Invalid CNIC") {
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().first().removeClass("label-primary");
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().first().addClass("label-danger");
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().last().addClass("label-danger");
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().first().html(data.Status);
+                                        $("[cnic='" + CNIC + "'][application-id='" + applicationID + "']").children().last().html(data.Response);
+                                        clearInterval(cnicVerificationInterval);
+                                    }
+                                }
+                            });
+                        }, 30000);
+                    }
+                });
+        }, 4000);
+    }
+    $(document).ready(function () {
+        $("[data-dismiss]").click(function () {
+            variables = [];
+            $(".approval-text").val("");
+        });
+    });
+</script>

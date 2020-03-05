@@ -1,0 +1,174 @@
+﻿@using Framework.Shared.DataServices;
+
+@{
+    ViewBag.Title = "SubscriptionRequest";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .error {
+        color: red;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Register New Organization
+    </h1>
+    <ol class="breadcrumb"></ol>
+</section>
+<section class="content container-fluid">
+    <div id="registerform" class="content clear" style="display: block;">
+        <form id="RequestOrganization" method="post" enctype="multipart/form-data">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="projectdetail">
+                        <div class="clear"></div>
+                        <div class="data">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Organization Name</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" class="form-control" id="Organization" name="RequestOrganizationName" placeholder="Organization Name" required="Required" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Email Address</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="email" class="form-control" id="Email" name="RequestEmail" placeholder="Email Address" required="Required" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Phone No.</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" class="form-control" id="PhoneNo" name="RequestPhoneNo" placeholder="Phone No." required="Required" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Mobile No.</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" class="form-control" id="MobileNo" name="RequestMobileNo" placeholder="Mobile No." required="Required" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Address</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="Address" name="RequestAddress" placeholder="Address" required="Required" />
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Number of Branches</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="number" class="form-control" id="Branches" name="RequestNoOfBranches" placeholder="Number of Branches" required="Required" />
+                                    </div>
+                                </div>
+                            </div>*@
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Logo</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="file" id="selectimage" class="form-control" name="Logo" oninput="UploadImage()" required="Required" />
+                                        <input type="hidden" name="Logo" id="image" />
+                                        <td>File should not be more than 5 MB</td>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <div class="row row-border">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-3">
+                                <input type="button" onclick="Register();" class="btn btn-block btn-primary" style="border: 0" value="Register">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="reset" id="btnCancel" onclick="Reset();" class="btn btn-block btn-default" style="border: 0" value="Cancel">
+                            </div>
+                            <div class="col-sm-3"></div>
+                        </div>
+                    </div>
+                    <div id="successAlert" class="alert alert-success alert-dismissible" style="display:none;">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4><i class="icon fa fa-check"></i> Alert!</h4>
+                        <span id="successMessage"></span>
+                    </div>
+                    <div id="errorAlert" class="alert alert-danger alert-dismissible" style="display:none;">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                        <span id="errorMessage"></span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div id="message" style="display:none;" class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-check"></i> Alert!</h4>
+        <div id="messageText"></div>
+    </div>
+    <div class="clear"></div>
+</section>
+<script>
+    function Register() {
+       var abd = $("#image").val();
+       $.ajax({
+           method: "POST",
+           url: "@Url.Action("SubscriptionRequest","Configuration")?Logo" + abd,
+           data: $("#RequestOrganization").serialize(),
+
+       }).done(function (response) {
+           $("#successMessage").html("Organization has been registered successfully").fadeOut(2000);
+           document.location.href = "/Configuration/Organization";
+        });
+    }
+     function SendEmail() {
+       $.ajax({
+            method: "POST",
+            url: "@Url.Action("SendEmail","Authentication")",
+            data: $("#RequestOrganization").serialize()
+       }).done(function (response) {
+       });
+    }
+    var UploadImage = function () {
+        var file = $("#selectimage").get(0).files;
+        var data = new FormData;
+        data.append("ImageFile", file[0]);
+        $.ajax({
+            method: "POST",
+            url: "@Url.Action("UploadFile","Authentication")",
+            data: data,
+             contentType: false,
+             processData: false,
+        }).done(function (response) {
+            $("#image").val(response.file);
+        });
+    }
+    function Reset() {
+        document.location.href = document.location.href;
+    }
+</script>
+
+
+

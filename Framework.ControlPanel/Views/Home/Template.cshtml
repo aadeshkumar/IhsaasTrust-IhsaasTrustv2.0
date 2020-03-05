@@ -1,0 +1,181 @@
+﻿@using Framework.Shared.Enums;
+@using Newtonsoft.Json
+@model List<Framework.Application.Services.TemplateData>
+@using System.Globalization;
+@using Framework.Shared.DataServices
+@using Newtonsoft.Json
+@using Framework.ControlPanel.CommonCode.Helpers
+
+@if (Model != null && Model.Count > 0)
+    {
+        <input id="timeline-data" type="hidden" value='@JsonConvert.SerializeObject(Model.Select(x => new { date = (x.CreatedOn.ToString("dd/MM/yyyy hh:mm:ss tt")), title=Enum.GetName(typeof(StatusesEnum), x.StatusID), content ="Reason:"+x.Reason +": by "+ Framework.Application.Services.ApplicationServices.Instance.GetUserName(x.UserID) }))' />
+    }
+
+<link href="https://www.jqueryscript.net/demo/Horizontal-Vertical-Timeline-Plugin-jQuery/dist/css/timeline.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        crossorigin="anonymous">
+</script>
+<script src="https://www.jqueryscript.net/demo/Horizontal-Vertical-Timeline-Plugin-jQuery/dist/js/timeline.min.js"></script>
+
+<style>
+    .inner p {
+        font-size: 15px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="pad margin no-print">
+            <div class="callout callout-info" style="margin-bottom: 0!important;">
+                <h4><i class="fa fa-info"></i> Application:</h4>
+                This application has been created at @(Model != null && Model.Count > 0 ? Model[0].CreatedOn.ToString(" hh:mm tt on dd-MM-yyyy ") : "Not Available")
+            </div>
+        </div>
+        @*<h2 class="text-center">Application Created at  @(Model != null && Model.Count > 0 ? Model[0].CreatedOn.ToString(" hh:mm tt on dd-MM-yyyy ") : "Not Available")</h2>*@
+        <div class="panel-body">
+            <div class="timeline">
+                <div class="timeline__wrap">
+                    <div class="timeline__items">
+
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            foreach (var status in Model)
+                            {
+                                <div class="timeline__item ">
+                                    <div class="timeline__content @ColorClass(Enum.GetName(typeof(StatusesEnum), status.StatusID))">
+                                        <div class="small-box" style="box-shadow: none;">
+                                            <div class="inner">
+                                                <h2 style="font-size:17px;">Date & Time: @status.CreatedOn.ToString("dd/MM/yyyy hh:mm:ss tt")</h2>
+                                                <p><strong>@(Enum.GetName(typeof(StatusesEnum), status.StatusID) + " by " + Framework.Application.Services.ApplicationServices.Instance.GetUserName(status.UserID)) </strong></p>
+                                                @if (status.CreatedBy == 2)
+                                                {
+                                                    <br />
+                                                    <p>
+                                                        <strong>Source Of Income:</strong>
+                                                        @if (status.SourceOfIncome != null && status.Reason != "")
+                                                        {
+                                                            @status.SourceOfIncome
+                                                        }
+                                                        else
+                                                        {
+                                                            <strong><span class="text-red">Not available.</span></strong>
+                                                        }
+                                                    </p>
+                                                    <p>
+                                                        <strong>Field Officer Recommendation:</strong>
+                                                        @if (status.FieldOfficerRecommendation != null && status.Reason != "")
+                                                        {
+                                                            @status.FieldOfficerRecommendation
+                                                        }
+                                                        else
+                                                        {
+                                                            <strong><span class="text-red">Not available.</span></strong>
+                                                        }
+                                                    </p>
+                                                }
+                                                @if (status.CreatedBy == 3 || status.CreatedBy == 4 || status.CreatedBy == 6 || status.CreatedBy == 7)
+                                                {
+                                                    <p>
+                                                        <strong>Reason:</strong>
+                                                        @if (status.Reason != null && status.Reason != "")
+                                                        {
+                                                            @status.Reason
+                                                        }
+                                                        else
+                                                        {
+                                                            <strong><span class="text-red">Not available.</span></strong>
+                                                        }
+                                                    </p>
+                                                }
+                                                @if (status.CreatedBy == 4)
+                                                {
+                                                    <p>
+                                                        <strong>Recommendation:</strong>
+                                                        @if (status.RSRecommendation != null && status.Reason != "")
+                                                        {
+                                                            @status.RSRecommendation
+                                                        }
+                                                        else
+                                                        {
+                                                            <strong><span class="text-red">Not available.</span></strong>
+                                                        }
+                                                    </p>
+                                                }
+                                                @if (status.CreatedBy == 7)
+                                                {
+                                                    <p>
+                                                        <strong>Amount:</strong>
+                                                        @if (status.FinanceAmount != null && status.Reason != "")
+                                                        {
+                                                            @status.FinanceAmount
+                                                        }
+                                                        else
+                                                        {
+                                                            <strong><span class="text-red">Not available.</span></strong>
+                                                        }
+                                                    </p>
+                                                }
+
+                                            </div>
+                                            <div class="icon">
+                                                <i class="@IonClass(Enum.GetName(typeof(StatusesEnum), status.StatusID))"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    timeline(document.querySelectorAll('.timeline'), {
+        mode: 'vertical',
+        verticalStartPosition: 'left',
+        visibleItems: 1
+    });
+</script>
+
+
+@functions {
+    public string ColorClass(string ColumnName)
+    {
+        string colorClass = ColumnName == StatusesEnum.Rejected.ToString() ? "bg-red-gradient" :
+                                ColumnName == StatusesEnum.Submit.ToString() ? "bg-aqua-gradient" :
+                                ColumnName == StatusesEnum.Approved.ToString() ? "bg-green-gradient" :
+                                ColumnName == StatusesEnum.Completed.ToString() ? "bg-maroon" :
+                                "bg-yellow-gradient";
+        return colorClass;
+    }
+    public string IonClass(string ColumnName)
+    {
+        string ionClass = ColumnName == StatusesEnum.Rejected.ToString() ? "ion ion-android-delete" :
+                               ColumnName == StatusesEnum.Submit.ToString() ? "ion ion-edit" :
+                               ColumnName == StatusesEnum.Approved.ToString() ? "ion ion-checkmark" :
+                               ColumnName == StatusesEnum.Completed.ToString() ? "ion ion-briefcase" :
+                               "ion ion-stats-bar";
+        return ionClass;
+    }
+}
+
+
+@*<div id = "my-timeline" class="roadmap roadmap--initialized"></div>
+    <script>
+                $(document).ready(function () {
+        var events = $.parseJSON($("#timeline-data").val());
+                    $('#my-timeline').roadmap(events, {
+        orientation: 'vertical',
+                        eventsPerSlide: 6,
+                        slide: 1,
+                        prevArrow: '<i class="material-icons">keyboard_arrow_left</i>',
+                        nextArrow: '<i class="material-icons">keyboard_arrow_right</i>'
+                    });
+    });
+    </script>*@

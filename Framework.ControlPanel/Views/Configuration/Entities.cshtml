@@ -1,0 +1,6 @@
+﻿@{
+    ViewBag.Title = "Entities";
+}
+
+@{Html.RenderAction("TableForm", "Dynamic", new { tableName = "Entities", title = "Manage Entities", gridColumns = "", excludeSearchColumns = "", extenderName = "EntitiesExtender", allowListingGrid = true, allowSearchFilter = true });}
+

@@ -1,0 +1,78 @@
+﻿.btn-cls {
+    background: #3C8DBC;
+    border: 0;
+    min-width: 100px;
+    color: #ffffff;
+}
+
+    .btn-cls:hover {
+        color: #ffffff;
+        background: #194482;
+    }
+.form-rounded {
+    border-radius: 0.6rem;
+}
+.alert-cls {
+    background: #3C8DBC;
+    color: #ffffff;
+}
+#cover-spin {
+    position: relative;
+    width: 100%;
+    height:100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    z-index: 9999;
+    display: block;
+}
+
+@-webkit-keyframes spin {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#cover-spin::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 48%;
+    top: 40%;
+    width: 40px;
+    height: 40px;
+    border-style: solid;
+    border-color: black;
+    border-top-color: transparent;
+    border-width: 4px;
+    border-radius: 50%;
+    -webkit-animation: spin .8s linear infinite;
+    animation: spin .8s linear infinite;
+}
+
+.overlay {
+    background: #e9e9e9;
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0.5;
+}

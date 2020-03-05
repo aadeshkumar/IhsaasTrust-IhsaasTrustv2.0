@@ -1,0 +1,60 @@
+﻿@using Framework.Shared.DataServices
+@model Framework.ControlPanel.Models.DashboardModel
+@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+@if (Model.ApplicationAssignedToFieldOfficer != null && Model.ApplicationAssignedToFieldOfficer.Count != 0)
+{
+    <div class="box box-default">
+        <div class="box-header with-border">
+            <h3 class="box-title">Application Assigned By CEO/Head of Field Officer</h3>
+
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-xs-12 table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <td>Application ID</td>
+                                <td>Applicant Name</td>
+                                <td>CNIC</td>
+                                <td>Contact No.</td>
+                                <td>Assigned Date</td>
+                                <td>Assigned By</td>
+                                <td>Link</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ApplicationAssignedToFieldOfficer)
+                            {
+                                <tr>
+                                    <td>
+                                        <a href="@string.Format("/application?applicationID={0}&edit=true", item.ApplicationID)">
+                                            @item.ApplicationID
+                                        </a>
+                                    </td>
+                                    <td>@item.ApplicantName</td>
+                                    <td>@item.CNIC</td>
+                                    <td>@item.ContactNo</td>
+                                    <td>@item.CreatedOn.ToString("dd-MM-yyyy hh:mm:ss")</td>
+                                    <td>@item.AssignedBy</td>
+                                    <td>
+                                        <a href="@string.Format("/application?applicationID={0}&edit=true", item.ApplicationID)">
+                                            <i class="fa fa-link"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}

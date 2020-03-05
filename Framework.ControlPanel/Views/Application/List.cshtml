@@ -1,0 +1,76 @@
+﻿@using Framework.Shared.DataServices
+@using Framework.ControlPanel.Models
+@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+@model ApplicationListModel
+@{
+    ViewBag.Title = "Manage Applications";
+}
+
+<section class="content-header">
+    <h1>
+        Manage Applications
+    </h1>
+    <ol class="breadcrumb"></ol>
+</section>
+<section class="content container-fluid">
+    @if ((Authentication.Instance.User.RoleID == (short)RolesEnum.FieldWorker || Authentication.Instance.User.RoleID == (short)RolesEnum.Admin || Authentication.Instance.User.RoleID == (short)RolesEnum.CEO))
+    {
+        <div class="row">
+            <div class="col-sm-4">
+                <a id="btnNew" href="/portal/application/create" class="btn btn-block btn-cls"><i class="icon"></i>Add New Application</a>
+            </div>
+        </div>
+    }
+    <br />
+    <div class="panel">
+        <div class="panel-body">
+            <form id="searchForm">
+                <div class="col-md-2">
+                    <input type="text" class="col-lg-4 form-control" placeholder="Applicant Name" name="applicantName" />
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="col-lg-4 form-control" placeholder="CNIC" name="CNIC" />
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="col-lg-4 form-control" placeholder="Contact No" name="contactNo" />
+                </div>
+                <div class="col-md-2">
+                    <div style="margin-top:6px;">
+                        <input class="custom-control-input" type="checkbox" id="cbx_enterprise">
+                        <label style="font-size: 12px;">Enterprise Facilitation</label>
+                        <input type="hidden" id="enterprise" name="enterprise" />
+                    </div>
+                </div>
+                <div class="col-md-offset-2">
+                    <input id="btnSearch" type="button" class="col-lg-4 btn btn-primary" value="Search" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="listDiv">
+        @Html.Partial("_List", Model)
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnSearch").click(function () {
+            $.ajax({
+                data: $("#searchForm").serialize(),
+                url: "/Application/List",
+                type: "GET"
+            }).done(function (data) {
+                $("#listDiv").html(data);
+            })
+        });
+        $("#cbx_enterprise").click(function () {
+            if ($(this).prop("checked")) {
+                $("#enterprise").val("true");
+            }
+            else {
+                $("#enterprise").val("false");
+            }
+        });
+    });
+</script>

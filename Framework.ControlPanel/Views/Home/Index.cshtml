@@ -1,0 +1,298 @@
+﻿@using Framework.Shared.DataServices
+@using Newtonsoft.Json
+@model Framework.ControlPanel.Models.DashboardModel
+@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+@{
+    ViewBag.Title = "Ihsaas Trust";
+}
+
+<style>
+
+    #chartdiv {
+        width: 100%;
+        height: 500px;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Dashboard
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Dashboard</li>
+    </ol>
+    <hr />
+    
+    <div class="col-xs-12 charts_view">
+        <ul class="charts_view">
+
+            @if (Authentication.Instance.User.RoleID == (short)RolesEnum.SuperAdmin)
+            {
+                foreach (var organization in Model.ActiveOrganization)
+                {
+
+                    <li onclick="Search('@organization.OrganizationID')"><button><b>@organization.OrganizationName</b></button></li>
+
+                    @*<tr>
+                            <input onclick="Search('@organization.OrganizationID')" value="@organization.OrganizationName"/>
+                        </tr>*@
+
+                }
+            }
+        </ul>
+        <div class="row">
+            @{ Html.RenderPartial("_DashboardStatistics", Model); }
+        </div>
+
+        <div class="row">
+            @{ Html.RenderPartial("_ApplicationAssignedToFieldOfficer", Model); }
+
+            @if (Model.NoOfApplicationsByUsers != null && Model.NoOfApplicationsByUsers.Count != 0)
+            {
+                <form id="dateForm" method="post">
+                    <div class="form-inline">
+                        <label class="form-control">Filter Statistics</label>
+                        <label class="form-control">From Date</label>
+                        <input type="date" class="form-control" name="fromDate" />
+                        <label class="form-control">To Date</label>
+                        <input type="date" class="form-control" name="ToDate" />
+                        <input class="btn btn-primary" type="button" value="Filter" id="DateButton" />
+
+                    </div>
+                </form>
+                <hr />
+            }
+
+            @{ Html.RenderPartial("_Dashboard", Model); }
+
+
+
+            @*@{ Html.RenderPartial("_DashboardStatuses", Model); }*@
+        </div>
+
+        <br />
+        <br />
+        <br />
+        <br />
+    </div>
+
+</section>
+
+
+<!-- Resources -->
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
+<!-- Chart code -->
+<script>
+    function Search(OrganizationID) {
+        debugger;
+        location.href = '@Url.Action("Index","Home")?OrganizationID=' + OrganizationID
+
+    }
+
+
+    $(document).ready(function () {
+        $("#modal-noti").hide()
+        $("#DateButton").click(function (data) {
+            updateCharts();
+        })
+
+
+    });
+    function updateCharts() {
+        $.ajax({
+            url: "/Home/GetCharts",
+            type: "GET",
+            data: $("#dateForm").serialize() + "&organizationID=" + $("#organizationID").val()
+        }).done(function (data) {
+            debugger;
+            $("#Dashboard").html(data);
+            doReady();
+        });
+    }
+
+    function showNotification(NotificationID) {
+        variables = {
+            NotificationID: NotificationID
+        }
+        $.ajax({
+            data: variables,
+            url: "/Home/GetNotification",
+            type: "GET"
+
+        }).done(function (data) {
+            $("#modalcontent").html(data);
+            $("#modal-noti").show();
+        })
+    }
+    function doReady() {
+        // Themes begin
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        // Create chart instance
+        var noOfApplicationByUser = am4core.create("noOfApplicationByUserChart", am4charts.PieChart);
+
+        // Add and configure Series
+        var noOfApplicationByUserPieSeries = noOfApplicationByUser.series.push(new am4charts.PieSeries());
+        noOfApplicationByUserPieSeries.dataFields.value = "noofapplications";
+        noOfApplicationByUserPieSeries.dataFields.category = "fullname";
+
+        // Let's cut a hole in our Pie chart the size of 30% the radius
+        noOfApplicationByUser.innerRadius = am4core.percent(30);
+
+        // Put a thick white border around each Slice
+        noOfApplicationByUserPieSeries.slices.template.stroke = am4core.color("#fff");
+        noOfApplicationByUserPieSeries.slices.template.strokeWidth = 2;
+        noOfApplicationByUserPieSeries.slices.template.strokeOpacity = 1;
+        noOfApplicationByUserPieSeries.slices.template
+            // change the cursor on hover to make it apparent the object can be interacted with
+            .cursorOverStyle = [
+                {
+                    "property": "cursor",
+                    "value": "pointer"
+                }
+            ];
+
+        noOfApplicationByUserPieSeries.alignLabels = false;
+        noOfApplicationByUserPieSeries.labels.template.bent = false;
+        noOfApplicationByUserPieSeries.labels.template.text = "{value.percent.formatNumber('#.0')}%";;
+        noOfApplicationByUserPieSeries.labels.template.radius = am4core.percent(-40);
+        noOfApplicationByUserPieSeries.labels.template.fill = am4core.color("white");
+
+        noOfApplicationByUserPieSeries.ticks.template.disabled = true;
+
+        // Create a base filter effect (as if it's not there) for the hover to return to
+        var shadow = noOfApplicationByUserPieSeries.slices.template.filters.push(new am4core.DropShadowFilter);
+        shadow.opacity = 0;
+
+        // Create hover state
+        var hoverState = noOfApplicationByUserPieSeries.slices.template.states.getKey("hover"); // normally we have to create the hover state, in this case it already exists
+
+        // Slightly shift the shadow and make it more prominent on hover
+        var hoverShadow = hoverState.filters.push(new am4core.DropShadowFilter);
+        hoverShadow.opacity = 0.7;
+        hoverShadow.blur = 5;
+
+        // Add a legend
+        //noOfApplicationByUser.legend = new am4charts.Legend();
+
+        noOfApplicationByUser.data = $.parseJSON($("#NoOfApplicationsByUsers").val());
+
+        var statusCount = am4core.create("statusCountChart", am4charts.PieChart);
+
+        // Add and configure Series
+        var statusCountPieSeries = statusCount.series.push(new am4charts.PieSeries());
+        statusCountPieSeries.dataFields.value = "statuscount";
+        statusCountPieSeries.dataFields.category = "statusname";
+
+        // Let's cut a hole in our Pie chart the size of 30% the radius
+        statusCount.innerRadius = am4core.percent(30);
+
+        // Put a thick white border around each Slice
+        statusCountPieSeries.slices.template.stroke = am4core.color("#fff");
+        statusCountPieSeries.slices.template.strokeWidth = 2;
+        statusCountPieSeries.slices.template.strokeOpacity = 1;
+        statusCountPieSeries.slices.template
+            // change the cursor on hover to make it apparent the object can be interacted with
+            .cursorOverStyle = [
+                {
+                    "property": "cursor",
+                    "value": "pointer"
+                }
+            ];
+
+        statusCountPieSeries.alignLabels = false;
+        statusCountPieSeries.labels.template.bent = false;
+        statusCountPieSeries.labels.template.text = "{value.percent.formatNumber('#.0')}%";
+        statusCountPieSeries.labels.template.radius = am4core.percent(-40);
+        statusCountPieSeries.labels.template.fill = am4core.color("white");
+        statusCountPieSeries.labels.template.relativeRotation = 90;
+        statusCountPieSeries.ticks.template.disabled = true;
+
+        // Create a base filter effect (as if it's not there) for the hover to return to
+        shadow = statusCountPieSeries.slices.template.filters.push(new am4core.DropShadowFilter);
+        shadow.opacity = 0;
+
+        // Create hover state
+        hoverState = statusCountPieSeries.slices.template.states.getKey("hover"); // normally we have to create the hover state, in this case it already exists
+
+        // Slightly shift the shadow and make it more prominent on hover
+        hoverShadow = hoverState.filters.push(new am4core.DropShadowFilter);
+        hoverShadow.opacity = 0.7;
+        hoverShadow.blur = 5;
+
+        // Add a legend
+        //statusCount.legend = new am4charts.Legend();
+
+        statusCount.data = $.parseJSON($("#StatusCount").val());
+
+        var streamCount = am4core.create("noOfStreamChart", am4charts.PieChart);
+
+        // Add and configure Series
+        var streamCountPieSeries = streamCount.series.push(new am4charts.PieSeries());
+        streamCountPieSeries.dataFields.value = "count";
+        streamCountPieSeries.dataFields.category = "stream";
+
+        // Let's cut a hole in our Pie chart the size of 30% the radius
+        streamCount.innerRadius = am4core.percent(30);
+
+        // Put a thick white border around each Slice
+        streamCountPieSeries.slices.template.stroke = am4core.color("#fff");
+        streamCountPieSeries.slices.template.strokeWidth = 2;
+        streamCountPieSeries.slices.template.strokeOpacity = 1;
+        streamCountPieSeries.slices.template
+            // change the cursor on hover to make it apparent the object can be interacted with
+            .cursorOverStyle = [
+                {
+                    "property": "cursor",
+                    "value": "pointer"
+                }
+            ];
+
+        streamCountPieSeries.alignLabels = false;
+        streamCountPieSeries.labels.template.bent = false;
+        streamCountPieSeries.labels.template.text = "{value.percent.formatNumber('#.0')}%";
+        streamCountPieSeries.labels.template.radius = am4core.percent(-40);
+        streamCountPieSeries.labels.template.fill = am4core.color("white");
+        streamCountPieSeries.labels.template.relativeRotation = 90;
+
+        streamCountPieSeries.ticks.template.disabled = true;
+
+        // Create a base filter effect (as if it's not there) for the hover to return to
+        shadow = streamCountPieSeries.slices.template.filters.push(new am4core.DropShadowFilter);
+        shadow.opacity = 0;
+
+        // Create hover state
+        hoverState = streamCountPieSeries.slices.template.states.getKey("hover"); // normally we have to create the hover state, in this case it already exists
+
+        // Slightly shift the shadow and make it more prominent on hover
+        hoverShadow = hoverState.filters.push(new am4core.DropShadowFilter);
+        hoverShadow.opacity = 0.7;
+        hoverShadow.blur = 5;
+
+        // Add a legend
+        //statusCount.legend = new am4charts.Legend();
+
+        streamCount.data = $.parseJSON($("#StreamCount").val());
+    }
+    am4core.ready(function () {
+
+        doReady();
+
+    });
+
+
+
+
+
+
+    // end am4core.ready()
+</script>
+
+<!-- HTML -->

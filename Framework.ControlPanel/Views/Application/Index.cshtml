@@ -1,0 +1,613 @@
+﻿@using Framework.Shared.DataServices
+@using Framework.ControlPanel.Models
+@using Framework.Shared.Enums
+@using Framework.ControlPanel.CommonCode.Helpers;
+@model ApplicationModel
+@{
+    ViewBag.Title = "Manage Applications";
+}
+<style>
+    .error {
+        color: red;
+    }
+
+    .del-img {
+        color: red;
+        position: absolute;
+        margin-left: -14px;
+        font-weight: 600;
+        font-size: large;
+        cursor: pointer;
+    }
+
+    .attachment {
+        float: left;
+        margin: 1px 1px 1px 1px;
+        position: relative;
+        display: inline-block;
+    }
+
+        .attachment .close {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            z-index: 100;
+            color: red;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            font-size: 22px;
+            line-height: 10px;
+            border-radius: 50%;
+        }
+
+        .attachment:hover .close {
+            opacity: 1;
+        }
+
+    .attachment-font {
+        font-size: 5em;
+    }
+
+    .disabled-readonly {
+        pointer-events: none;
+        /* for "disabled" effect */
+        opacity: 0.5;
+        background: #CCC;
+    }
+</style>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://files.codepedia.info/files/uploads/iScripts/html2canvas.js"></script>
+</head>
+
+<section class="content container-fluid">
+    <form id="detailForm" method="post" enctype="multipart/form-data">
+
+        <div class="panel panel-default">
+            <div id="editor"></div>
+            @*<button onclick="demoFromHTML()">Generate PDF</button>*@
+            <a id="btn-Convert-Html2Image" href="#">Download PDF Application</a>
+            <div id="previewImage" style="display: none;">
+            </div>
+            <div class="panel-body">
+                <div id="projectdetail">
+                    <div id="hiddenarea">
+                        <input type="hidden" id="ApplicationID" name="ApplicationID" value="@(Model.ApplicationID.HasValue ? Model.ApplicationID.Value : 0)" />
+                        <input type="hidden" id="UserID" value="@(Authentication.Instance.User.UserID)" />
+                        <input type="hidden" id="RoleID" value="@(Authentication.Instance.User.RoleID)" />
+                        <input type="hidden" id="DID" value="@Authentication.Instance.User.DisplayName" />
+                        <input type="hidden" id="DateTime" value="@DateTime.Now" />
+
+                    </div>
+                    <div class="clear"></div>
+                    <div id="html-content-holder">
+                        @foreach (var heading in Model.Fields.Where(x => x.ParentFieldID == null).OrderBy(x => x.DisplaySeqNo))
+                        {
+                            <h3>@heading.DisplayName</h3>
+
+                            <hr />
+                            foreach (var field in Model.Fields.Where(x => x.ParentFieldID == heading.FieldID).OrderBy(x => x.DisplaySeqNo))
+                            {
+                                if (Authentication.Instance.User.RoleID == (short)RolesEnum.FieldWorker)
+                                {
+                                    if (field.FieldID == 108 || field.FieldID == 117)
+                                    {
+                                        continue;
+                                    }
+                                }
+                                var fieldValue = Model.FieldValues.Where(x => x.ApplicationID == Model.ApplicationID && field.FieldID == x.FieldID) != null && Model.FieldValues.Where(x => x.ApplicationID == Model.ApplicationID && field.FieldID == x.FieldID).Count() != 0 ? Model.FieldValues.Where(x => x.ApplicationID == Model.ApplicationID && field.FieldID == x.FieldID).FirstOrDefault() : new FieldValue { FieldValueID = 0, Data = "" };
+                                string type = @Model.FieldTypes.Where(x => x.FieldTypeID == field.FieldTypeID).Select(x => x.FieldTypeName).FirstOrDefault().ToLower();
+                                string required = field.IsRequired ? "required=required" : string.Empty;
+                                string MaxLength = !string.IsNullOrEmpty(field.MaxLength) ? string.Format("maxlength={0}", field.MaxLength) : string.Empty;
+
+                                <div class="form-group">
+                                    <div class="row" rel-row="@field.FieldName">
+                                        <div class="col-sm-4">
+                                            <label>@field.DisplayName</label>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            @if (field.FieldTypeID == (short)FieldTypesEnum.Text
+                                                || field.FieldTypeID == (short)FieldTypesEnum.Number
+                                                || field.FieldTypeID == (short)FieldTypesEnum.DateTime)
+                                            {
+                                                string style = field.FieldTypeID == 8 ? "style=height:150px" : string.Empty;
+                                                <input type="@type" placeholder="@field.DisplayName" class="form-control form-rounded" id="@field.FieldID" @required name="@string.Format("fv{0}_fid{1}",   fieldValue.FieldValueID, field.FieldID)" value="@fieldValue.Data" @MaxLength @style field="@field.FieldName">
+                                            }
+                                            else if (field.FieldTypeID == (short)FieldTypesEnum.TextArea)
+                                            {
+                                                if (field.DisplayName == "Latlng")
+                                                {
+
+                                                    string style = field.FieldTypeID == 8 ? "style=height:150px" : string.Empty;
+                                                    <textarea placeholder="@field.DisplayName" id="demo" class="form-control form-rounded" id="@field.FieldID" @required name="@string.Format("fv{0}_fid{1}",   fieldValue.FieldValueID, field.FieldID)" value="@fieldValue.Data" maxlength="299" @style field="@field.FieldName">@fieldValue.Data</textarea>
+                                                    <button type="button" onclick="getLocation()">Fetch Location</button>
+                                                }
+                                                else
+                                                {
+                                                    string style = field.FieldTypeID == 8 ? "style=height:150px" : string.Empty;
+                                                    <textarea placeholder="@field.DisplayName" class="form-control form-rounded" id="@field.FieldID" @required name="@string.Format("fv{0}_fid{1}",   fieldValue.FieldValueID, field.FieldID)" value="@fieldValue.Data" maxlength="299" @style field="@field.FieldName">@fieldValue.Data</textarea>
+
+                                                }
+                                            }
+
+                                            else if (field.FieldTypeID == (short)FieldTypesEnum.CheckBox)
+                                            {
+                                                string checkedItem = !string.IsNullOrEmpty(fieldValue.Data) && fieldValue.Data == "true" ? "checked=" + fieldValue.Data.ToLower() : string.Empty;
+                                                <div class="col-sm-4 custom-control custom-checkbox mb-5" style="left:13px;">
+                                                    <input class="custom-control-input" type="checkbox" rel-field="@field.FieldID" id="cbx_@field.FieldID" @checkedItem>
+                                                    <input type="hidden" name="@string.Format("fv{0}_fid{1}", fieldValue.FieldValueID, field.FieldID)" id="@field.FieldID" value="@fieldValue.Data" />
+                                                </div>
+                                            }
+                                            else if (field.FieldTypeID == (short)FieldTypesEnum.RadioButton)
+                                            {
+                                                <div class="custom-control">
+                                                    @foreach (var item in field.Source.Split(','))
+                                                    {
+                                                        string checkedClass = item == fieldValue.Data ? "checked=checked" : string.Empty;
+                                                        <input type="radio" id="@field.FieldID" name="@string.Format("fv{0}_fid{1}", fieldValue.FieldValueID, field.FieldID)" @checkedClass value="@item" maxlength="299"> @item
+                                                    }
+                                                </div>
+                                            }
+                                            else if (field.FieldTypeID == (short)FieldTypesEnum.Formula)
+                                            {
+                                                <input readonly="readonly" formula-field="@field.Source" type="@type" placeholder="@field.DisplayName" class="form-control form-rounded" id="@field.FieldID" @required name="@string.Format("fv{0}_fid{1}",   fieldValue.FieldValueID, field.FieldID)" field="@field.FieldName" value="@fieldValue.Data" maxlength="299">
+                                            }
+                                            else if (field.FieldTypeID == (short)FieldTypesEnum.File)
+                                            {
+                                                <input type="@type" class="form-control form-rounded" file-id="@string.Format("fv{0}_fid{1}",   fieldValue.FieldValueID, field.FieldID)" accept="@field.Source" />
+                                                <input type="hidden" class="form-control form-rounded" id="@string.Format("fv{0}_fid{1}",   fieldValue.FieldValueID, field.FieldID)" @required name="@string.Format("fv{0}_fid{1}",   fieldValue.FieldValueID, field.FieldID)" field="@field.FieldName" value="@fieldValue.Data" />
+
+                                                foreach (var item in fieldValue.Data.Split(','))
+                                                {
+                                                    try
+                                                    {
+                                                        string ext = Path.GetExtension(item);
+                                                        if (ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".jpeg")
+                                                        {
+                                                            <div class='attachment'>
+                                                                <a target='_blank' href='@item'>
+                                                                    <img src='@item' style='width:70px;height:70px' />
+                                                                </a>
+                                                                <a onclick=DeleteFile('@item') class='close'>x</a>
+                                                            </div>
+                                                        }
+                                                        else if (ext == ".pdf")
+                                                        {
+                                                            <div class='attachment'>
+                                                                <a target='_blank' href='@item'><i class='fa fa-file-pdf-o fa-3 attachment-font'></i></a>
+                                                                <a onclick=DeleteFile('@item') class='close'>x</a>
+                                                            </div>
+                                                        }
+                                                        else if (ext == ".docx" || ext == ".doc")
+                                                        {
+                                                            <div class='attachment'>
+                                                                <a target='_blank' href='@item'><i class='fa fa-file-word-o fa-3 attachment-font'></i></a>
+                                                                <a onclick=DeleteFile('@item') class='close'>x</a>
+                                                            </div>
+                                                        }
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        //Do Nothing
+                                                    }
+                                                }
+
+                                            }
+                                            else if (field.FieldTypeID == (short)FieldTypesEnum.DropDownList)
+                                            {
+                                                string onChangeEvent = !string.IsNullOrEmpty(field.OnChangeEvent) ? string.Format("OnChangeEvent={0}", field.OnChangeEvent) : string.Empty;
+                                                string condition = !string.IsNullOrEmpty(field.Condition) ? string.Format("Condition={0}", field.Condition) : string.Empty;
+                                                <select @onChangeEvent @condition required class="form-control" id="@string.Format(" fv{0}_fid{1}", fieldValue.FieldValueID, field.FieldID)" name="@string.Format(" fv{0}_fid{1}", fieldValue.FieldValueID, field.FieldID)">
+                                                    <option selected value="">Select</option>
+                                                    @foreach (var dd in field.Source.Split('|'))
+                                                    {
+
+                                                        string[] val = dd.Split(',');
+
+                                                        //if (val[0] == "Select")
+                                                        //{
+                                                        //    continue;
+                                                        //}
+                                                        string selected = val[1] == fieldValue.Data ? "selected=selected" : string.Empty;
+                                                        <option @selected value="@val[1]">@val[0]</option>
+                                                    }
+                                                </select>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        @if ((Model.FieldWorkers != null && Model.FieldWorkers.Count != 0) && (Model.IsAdmin || Authentication.Instance.User.RoleID == (short)RolesEnum.CEO || Authentication.Instance.User.RoleID == (short)RolesEnum.HeadFieldWorker))
+                        {
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Assign to Field Officer</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <select class="form-control" id="FieldWorkerID" name="FieldWorkerID">
+                                            @foreach (var item in Model.FieldWorkers)
+                                            {
+                                                string selected = Model.Application != null && Model.Application.CreatedBy == item.UserID ? "selected=selected" : string.Empty;
+                                                <option @selected value="@item.UserID">@item.FullName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        }
+                        <div id="filters"></div>
+                        <div id="detailTbl"></div>
+                        <div id="savedRecords"></div>
+                    </div>
+                    @if (!Model.ReadOnly)
+                    {
+                        <div class="box-footer">
+                            <div class="row row-border">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-3">
+                                    <input type="submit" id="btnAction" class="btn btn-block btn-cls" value="Save">
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="reset" id="btnCancel" class="btn btn-block btn-default" style="border: 0" value="Cancel">
+                                </div>
+                                <div class="col-sm-3"></div>
+                            </div>
+                        </div>
+                    }
+                    <div id="successAlert" class="alert alert-success alert-dismissible" style="display:none;">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4><i class="icon fa fa-check"></i> Alert!</h4>
+                        <span id="successMessage"></span>
+                    </div>
+                    <div id="errorAlert" class="alert alert-danger alert-dismissible" style="display:none;">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                        <span id="errorMessage"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</section>
+
+
+    <script>
+      
+
+    </script>
+
+
+<script type="text/javascript">
+
+      $(document).ready(function () {
+            var element = $("#html-content-holder"); // global variable
+            var getCanvas; // global variable
+
+            html2canvas(element, {
+                onrendered: function (canvas) {
+                    $("#previewImage").append(canvas);
+                    getCanvas = canvas;
+                }
+            });
+
+            $("#btn-Convert-Html2Image").on('click', function () {
+                var imgageData = getCanvas.toDataURL("image/png");
+                // Now browser starts downloading it instead of just showing it
+                var newData = imgageData.replace(/^data:image\/png/, "data:application/octet-stream");
+                //$("#btn-Convert-Html2Image").attr("download", "your_pic_name.png").attr("href", newData);
+                var pdf = new jsPDF();
+                  pdf.addImage(imgageData, 'png', 0, 0);
+
+                  pdf.save('Application.pdf');
+
+            });
+        });
+
+
+var x = document.getElementById("demo");
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else { 
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+function showPosition(position) {
+  x.innerHTML = "" + position.coords.latitude + 
+  "," + position.coords.longitude;
+}
+  
+
+    $(document).ready(function () {
+        if ($("#ApplicationID").val() == "0") {
+            $("[rel-row='Hospital']").hide();
+        }
+        $('form input').keydown(function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        $("#btnAction").click(function () {
+            SaveUpdateApplication();
+        });
+        $("#btnCancel").click(function () {
+            Cancel();
+        });
+        $("[field=NoOfDependentsInHouseHold]").keyup(function () {
+            if (isNaN($("[field=NoOfDependentsInHouseHold]").val())) {
+                $("[field=RecommendationAmount]").val(0);
+            } else {
+                var jpqx = $.ajax({
+                    type: "GET",
+                    url: "/Application/GetRecommendedRation?noOfPersons=" + $("[field=NoOfDependentsInHouseHold]").val(),
+                }).done(function (data) {
+                    $("[field=RecommendationAmount]").val(data);
+                });
+            }
+        });
+        FormulaField();
+        $("[type='checkbox']").each(function () {
+            var fieldID = $(this).attr("rel-field");
+            $(this).click(function () {
+                if ($(this).prop("checked")) {
+                    $("#" + fieldID).val("true");
+                }
+                else {
+                    $("#" + fieldID).val("false");
+                }
+            });
+        });
+        Upload();
+        OnChangeEvent();
+    });
+    function SaveUpdateApplication() {
+        $("[readonly]").removeAttr("readonly");
+        if ($("#detailForm").valid()) {
+           $("#detailForm").submit(function (e) {
+                $("#btnAction").attr("disabled", "disabled");
+                $.ajax({ type: "POST", url: "/Application/SaveUpdateApplication", data: $("#detailForm").serialize() }).done(function (data) {
+                    if (data.Failed) {
+                        setTimeout(function () {
+                            ShowErrorMessage(data.Message);
+                            $("#btnAction").removeAttr("disabled");
+                        }, 10000);
+                    }
+                    else {
+                        ShowSuccessMessage(data.Message);
+                        SendEmail(data.ApplicationID);
+                        $("#btnAction").removeAttr("disabled");
+
+                    }
+                });
+               e.preventDefault();
+           });
+        }
+
+    }
+
+    function SendEmail(applicationID) {
+        var variablesMail = {};
+        if ($("#RoleID").val() == 1) {
+            variablesMail = {
+                UserID: $("#UserID").val(),
+                Subject: 'New application assigned to you by Admin!',
+                EmailUserID: parseInt($("#FieldWorkerID").val()),
+                FieldOfficer: '@Authentication.Instance.User.DisplayName (@(((RolesEnum)Authentication.Instance.User.RoleID).ToString()))',
+                ApplicantName: $("[Field='ApplicantName']").val(),
+                CNIC: $("[Field='CNIC']").val(),
+                ContactNo: $("[Field='ContactNo']").val(),
+                ApplicationID: applicationID,
+                RoleID: '@Authentication.Instance.User.RoleID'
+            }
+        }
+        else if ($("#RoleID").val() == 2) {
+            var editOrCreated = $("#ApplicationID").val() == "0" ? "New application has been created!" : "Application has been updated!";
+            variablesMail = {
+                UserID: $("#UserID").val(),
+                Subject: editOrCreated,
+                EmailUserID: parseInt($("#FieldWorkerID").val()),
+                FieldOfficer: '@Authentication.Instance.User.DisplayName (@(((RolesEnum)Authentication.Instance.User.RoleID).ToString()))',
+                ApplicantName: $("[Field='ApplicantName']").val(),
+                CNIC: $("[Field='CNIC']").val(),
+                ContactNo: $("[Field='ContactNo']").val(),
+                ApplicationID: applicationID,
+                RoleID: '@Authentication.Instance.User.RoleID'
+            }
+        }
+        else if ($("#RoleID").val() == 5) {
+            variablesMail = {
+                UserID: $("#UserID").val(),
+                Subject: 'New application assigned to you by Head of Field Officer',
+                EmailUserID: parseInt($("#FieldWorkerID").val()),
+                FieldOfficer: '@Authentication.Instance.User.DisplayName (@(((RolesEnum)Authentication.Instance.User.RoleID).ToString()))',
+                ApplicantName: $("[Field='ApplicantName']").val(),
+                CNIC: $("[Field='CNIC']").val(),
+                ContactNo: $("[Field='ContactNo']").val(),
+                ApplicationID: applicationID,
+                RoleID: '@Authentication.Instance.User.RoleID'
+            }
+        }
+        else if ($("#RoleID").val() == 6) {
+            variablesMail = {
+                UserID: $("#UserID").val(),
+                Subject: 'New application assigned to you by CEO',
+                EmailUserID: parseInt($("#FieldWorkerID").val()),
+                FieldOfficer: '@Authentication.Instance.User.DisplayName (@(((RolesEnum)Authentication.Instance.User.RoleID).ToString()))',
+                ApplicantName: $("[Field='ApplicantName']").val(),
+                CNIC: $("[Field='CNIC']").val(),
+                ContactNo: $("[Field='ContactNo']").val(),
+                ApplicationID: applicationID,
+                RoleID: '@Authentication.Instance.User.RoleID'
+            }
+        }
+        //var smsVariables;
+        //smsVariables = {
+        //    UserID:$("#UserID").val(),
+        //    mobileno: 923132291468,
+        //    MessageText: variablesMail.Subject + ' at ' + $("#DateTime").val() + '. Visit ' + 'http://bitscollision-001-site1.etempurl.com/application?applicationID=' + applicationID + ' to view it.'
+        //}
+
+        $.ajax({
+            type: "POST",
+            url: "/Application/SendMail",
+            data: variablesMail
+        }).done(function (data) {
+            setTimeout(function () {
+                document.location.href = "/portal/application/list";
+            }, 4000);
+        });
+        //$.ajax({
+        //    type: "POST",
+        //    url: "/Application/SendSMS",
+        //    data: smsVariables
+        //});
+    }
+    function Cancel() {
+        document.location.href = "/portal/application/list";
+    }
+    function FormulaField() {
+        $("[formula-field]").each(function () {
+            var ff = $(this).attr("formula-field").split(",");
+            $(ff).each(function () {
+                if (this != "+" && this != "-" && this != "*" && this != "/") {
+                    $("[field='" + this + "']").keyup(function () {
+                        $("[formula-field]").each(function () {
+                            var formulaField = $(this).attr("formula-field").split(",");
+                            var exp = "";
+                            $(formulaField).each(function () {
+                                var item = this;
+                                if (item != "+" && item != "-" && item != "*" && item != "/") {
+                                    var val = $("[field='" + item + "']").val();
+                                    if (val == "") {
+                                        var lastOperator = exp.substring(exp.length - 1, 1);
+                                        if (lastOperator == "+" || lastOperator == "-") {
+                                            val = 0;
+                                        }
+                                        else if (lastOperator == "*" || lastOperator == "/") {
+                                            val = 1;
+                                        }
+                                        else {
+                                            val = 0;
+                                        }
+                                    }
+                                    exp += val;
+                                }
+                                else {
+                                    exp += item;
+                                }
+                            });
+                            $(this).val(eval(exp));
+                        });
+                    });
+                }
+            });
+        });
+    }
+    function Upload() {
+        $("input[type='file']").change(function () {
+            if (this.files[0].size > 5000000) {
+                alert("Please upload file less than 5MB. Thanks!!");
+            }
+            else {
+                var fileID = $(this).attr("file-id");
+                var fileFieldValue = $("#" + fileID).val() == undefined ? "" : $("#" + fileID).val();
+                var formData = new FormData();
+                formData.append('file', $(this)[0].files[0]);
+                $.ajax({
+                    url: "/Application/UploadFile",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,  // tell jQuery not to process the data
+                    contentType: false,  // tell jQuery not to set contentType
+                    success: function (data) {
+                        fileFieldValue += data.file + ",";
+                        $("#" + fileID).val(fileFieldValue);
+                        if (data.ext == "jpg" || data.ext == "png" || data.ext == "gif" || data.ext == "jpeg") {
+                            $("#" + fileID).after("<div class='attachment'><a target='_blank' href='" + data.file + "'><img src='" + data.file + "' style='width:70px;height:70px'/></a><a onclick=DeleteFile('" + data.file + "') class='close'>x</a></div>");
+                        }
+                        else if (data.ext == "pdf") {
+                            $("#" + fileID).after("<div class='attachment'><a target='_blank' href='" + data.file + "'><i class='fa fa-file-pdf-o fa-3 attachment-font'></i></a><a onclick=DeleteFile('" + data.file + "') class='close'>x</a></div>");
+                        }
+                        else if (data.ext == "docx" || data.ext == "doc") {
+                            $("#" + fileID).after("<div class='attachment'><a target='_blank' href='" + data.file + "'><i class='fa fa-file-word-o fa-3 attachment-font'></i></a><a onclick=DeleteFile('" + data.file + "') class='close'>x</a></div>");
+                        }
+                    }
+                });
+            }
+        });
+    }
+    function DeleteFile(fileUrl) {
+        var files = $("input[type=hidden][value*='" + fileUrl + "']").val().replace(fileUrl + ",", "");
+        $("input[type=hidden][value*='" + fileUrl + "']").val(files);
+        $("a[href='" + fileUrl + "']").parent().remove();
+    }
+    $('#cbx_119').change(function () {
+        if ($('#cbx_119').is(':checked')) {
+            $("[rel-row='Hospital']").show();
+        }
+        else {
+            $("[rel-row='Hospital']").hide();
+        }
+    });
+    function OnChangeEvent() {
+        $("[OnChangeEvent]").each(function () {
+            var elem = $(this);
+            var element = $(this).attr("OnChangeEvent").split(',');
+            var condition = $(this).attr("Condition");
+            $(element).each(function (i, v) {
+                if (document.location.search == "") {
+                    $("[rel-row='" + this + "']").hide();
+                }
+                $(elem).change(function () {
+                    var val = $(elem).val();
+                    if (condition != undefined) {
+                        if (val == 'Select') {
+                            $("[rel-row='SyedOrHashmi']").hide();
+                        }
+                        else if (val == 'Shia' || val == 'Sunni') {
+                            $("[rel-row='SyedOrHashmi']").show();
+                        }
+                        else {
+                            $("[rel-row='SyedOrHashmi']").hide();
+                        }
+                        $('input[id="74"]').removeAttr("checked");
+                    }
+                    else {
+                        if (val == 'Select') {
+                            $("[rel-row='" + v + "']").hide();
+                            $("#" + v).val("Select");
+                        }
+                        else {
+                            $("[rel-row='" + v + "']").show();
+                        }
+                    }
+                });
+            });
+        });
+
+    }
+</script>
+
+
+@functions {
+    public double Evaluate(string expression)
+    {
+        double result = 0.00;
+        result = (double)new System.Xml.XPath.XPathDocument
+        (new StringReader("<r/>")).CreateNavigator().Evaluate
+        (string.Format("number({0})", new
+        System.Text.RegularExpressions.Regex(@"([\+\-\*])")
+        .Replace(expression, " ${1} ")
+        .Replace("/", " div ")
+        .Replace("%", " mod ")));
+        return result;
+    }
+}

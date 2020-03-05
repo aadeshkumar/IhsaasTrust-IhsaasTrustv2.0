@@ -1,0 +1,79 @@
+﻿@using Framework.Shared.DataServices;
+@model List<Organization>
+
+@{
+    ViewBag.Title = "Organization";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<section class="content-header">
+    <h1>
+        Organization Lists
+    </h1>
+    <ol class="breadcrumb"></ol>
+</section>
+<section class="content container-fluid">
+    <table id="table_listing" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Organization ID</th>
+                <th>Organization Name</th>
+                <th>Email</th>
+                <th>Phone No.</th>
+                <th>Mobile No.</th>
+                <th>Address</th>
+                <th>Is Active</th>
+                <th>Activate</th>
+                <th>DeActivate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var organization in Model)
+            {
+            <tr>
+                <td>@organization.OrganizationID</td>
+                <td>
+                    <input type="hidden" value="@organization.OrganizationID" />
+                    @organization.OrganizationName
+                </td>
+                <td>@organization.Email</td>
+                <td>@organization.PhoneNo</td>
+                <td>@organization.MobileNo</td>
+                <td>@organization.Address</td>
+                <td>@organization.IsActive</td>
+                <td>
+                    <button onclick="ActiveOrganization('@organization.OrganizationID')" class="btn btn-success">Activate</button>
+                </td>
+                <td>
+                    <button onclick="DeactiveOrganization('@organization.OrganizationID')" class="btn btn-danger">Deactivate</button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</section>
+<script type="text/javascript">
+   function DeactiveOrganization(OrganizationID) {
+    debugger;
+        var jqhx = $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeActiveOrganization","Application")?OrganizationID=" + OrganizationID,
+            data: $("#org").serialize()
+        }).done(function (response) {
+            location.reload();
+        });
+    }
+    function ActiveOrganization(OrganizationID) {
+    debugger;
+    var jqhx = $.ajax({
+            type: "POST",
+            url: "@Url.Action("ActiveOrganization","Application")?OrganizationID=" + OrganizationID,
+            data: $("#org").serialize()
+        }).done(function (response) {
+            location.reload();
+        });
+    }
+    $(document).ready(function () {
+        $("#table_listing").dataTable();
+    });
+</script>
