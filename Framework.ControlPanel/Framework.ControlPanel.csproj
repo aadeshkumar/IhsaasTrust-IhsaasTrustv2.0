@@ -13148,7 +13148,6 @@
     <Content Include="Content\bower_components\bootstrap-datepicker\package.json" />
     <Content Include="Content\bower_components\bootstrap-datepicker\README.md" />
     <Content Include="Content\bower_components\bootstrap-datepicker\tests\README.md" />
-    <Content Include="Content\bower_components\bootstrap-datepicker\yarn.lock" />
     <Content Include="Content\bower_components\bootstrap-daterangepicker\.bower.json" />
     <Content Include="Content\bower_components\bootstrap-daterangepicker\bower.json" />
     <Content Include="Content\bower_components\bootstrap-daterangepicker\daterangepicker.scss" />
@@ -13527,7 +13526,6 @@
     <Content Include="Content\bower_components\PACE\README.md" />
     <Content Include="Content\bower_components\raphael\.bower.json" />
     <Content Include="Content\bower_components\raphael\bower.json" />
-    <Content Include="Content\bower_components\raphael\yarn.lock" />
     <Content Include="Content\bower_components\select2\.bower.json" />
     <Content Include="Content\bower_components\select2\.editorconfig" />
     <Content Include="Content\bower_components\select2\.github\CONTRIBUTING.md" />
@@ -13759,7 +13757,6 @@
     <Content Include="assets\bower_components\bootstrap-datepicker\package.json" />
     <Content Include="assets\bower_components\bootstrap-datepicker\README.md" />
     <Content Include="assets\bower_components\bootstrap-datepicker\tests\README.md" />
-    <Content Include="assets\bower_components\bootstrap-datepicker\yarn.lock" />
     <Content Include="assets\bower_components\bootstrap-daterangepicker\.bower.json" />
     <Content Include="assets\bower_components\bootstrap-daterangepicker\bower.json" />
     <Content Include="assets\bower_components\bootstrap-daterangepicker\daterangepicker.scss" />
@@ -14136,7 +14133,6 @@
     <Content Include="assets\bower_components\PACE\README.md" />
     <Content Include="assets\bower_components\raphael\.bower.json" />
     <Content Include="assets\bower_components\raphael\bower.json" />
-    <Content Include="assets\bower_components\raphael\yarn.lock" />
     <Content Include="assets\bower_components\select2\.bower.json" />
     <Content Include="assets\bower_components\select2\.editorconfig" />
     <Content Include="assets\bower_components\select2\.github\CONTRIBUTING.md" />

@@ -29,10 +29,7 @@ namespace Framework.ControlPanel.Controllers
             model.Entities = AccountServices.Instance.GetEntities();
             model.Roles = AccountServices.Instance.GetRoles();
             model.Rights = AccountServices.Instance.GetRights();
-            if (roleID.HasValue)
-            {
-                model.RolesRights = AccountServices.Instance.GetRolesRights(roleID.Value);
-            }
+            model.RolesRights = AccountServices.Instance.GetRolesRights(roleID);
             model.RoleID = roleID;
             if (Request.IsAjaxRequest())
             {

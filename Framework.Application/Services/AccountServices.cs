@@ -53,11 +53,15 @@ namespace Framework.Application.Services
                 return context.Fetch<Entity>(ppSql);
             }
         }
-        public List<RoleRight> GetRolesRights(short roleID)
+        public List<RoleRight> GetRolesRights(short? roleID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
-                var ppSql = PetaPoco.Sql.Builder.Select(@"*").From("RoleRights").Where("RoleID=@0", roleID);
+                var ppSql = PetaPoco.Sql.Builder.Select(@"*").From("RoleRights");
+                if (roleID.HasValue && roleID.Value != 0)
+                {
+                    ppSql = ppSql.Where("RoleID=@0", roleID);
+                }
                 return context.Fetch<RoleRight>(ppSql);
             }
         }

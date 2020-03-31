@@ -56,13 +56,6 @@
         background: #CCC;
     }
 </style>
-<head>
-    <meta charset="utf-8" />
-    <title></title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="https://files.codepedia.info/files/uploads/iScripts/html2canvas.js"></script>
-</head>
-
 <section class="content container-fluid">
     <form id="detailForm" method="post" enctype="multipart/form-data">
 
@@ -276,17 +269,12 @@
     </form>
 </section>
 
-
-    <script>
-      
-
-    </script>
-
+    <script src="https://files.codepedia.info/files/uploads/iScripts/html2canvas.js"></script>
 
 <script type="text/javascript">
 
       $(document).ready(function () {
-            var element = $("#html-content-holder"); // global variable
+            var element = $(".content.container-fluid"); // global variable
             var getCanvas; // global variable
 
             html2canvas(element, {
@@ -369,11 +357,14 @@ function showPosition(position) {
         OnChangeEvent();
     });
     function SaveUpdateApplication() {
+        debugger;
         $("[readonly]").removeAttr("readonly");
         if ($("#detailForm").valid()) {
-           $("#detailForm").submit(function (e) {
+            $("#detailForm").submit(function (e) {
+                debugger;
                 $("#btnAction").attr("disabled", "disabled");
                 $.ajax({ type: "POST", url: "/Application/SaveUpdateApplication", data: $("#detailForm").serialize() }).done(function (data) {
+                    debugger;
                     if (data.Failed) {
                         setTimeout(function () {
                             ShowErrorMessage(data.Message);
