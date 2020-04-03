@@ -353,86 +353,106 @@ else
 @functions {
     public string ColorClass(string ColumnName)
     {
-        string colorClass = ColumnName.Contains(StatusesEnum.Rejected.ToString()) ? "bg-red-gradient" :
-                                ColumnName.Contains(StatusesEnum.Submit.ToString()) ? "bg-aqua-gradient" :
-                                ColumnName.Contains(StatusesEnum.Approved.ToString()) ? "bg-green-gradient" :
-                                ColumnName.Contains(StatusesEnum.Completed.ToString()) ? "bg-olive" :
-                                ColumnName.Contains(RolesEnum.CEO.ToString()) ? "bg-purple" :
-                                ColumnName.Contains(RolesEnum.Committee.ToString()) ? "bg-maroon" :
-                                ColumnName.Contains("Field Officer") ? "bg-yellow" :
-                                ColumnName.Contains(RolesEnum.Finance.ToString()) ? "bg-blue" :
-                                ColumnName.Contains(RolesEnum.RS.ToString()) ? "bg-teal" :
-                                ColumnName == "No. of Applications" ? "bg-fuchsia" :
-                                "bg-yellow-gradient";
+        string colorClass = "bg-yellow-gradient";
+        if (!string.IsNullOrEmpty(ColumnName))
+        {
+            colorClass = ColumnName.Contains(StatusesEnum.Rejected.ToString()) ? "bg-red-gradient" :
+                                    ColumnName.Contains(StatusesEnum.Submit.ToString()) ? "bg-aqua-gradient" :
+                                    ColumnName.Contains(StatusesEnum.Approved.ToString()) ? "bg-green-gradient" :
+                                    ColumnName.Contains(StatusesEnum.Completed.ToString()) ? "bg-olive" :
+                                    ColumnName.Contains(RolesEnum.CEO.ToString()) ? "bg-purple" :
+                                    ColumnName.Contains(RolesEnum.Committee.ToString()) ? "bg-maroon" :
+                                    ColumnName.Contains("Field Officer") ? "bg-yellow" :
+                                    ColumnName.Contains(RolesEnum.Finance.ToString()) ? "bg-blue" :
+                                    ColumnName.Contains(RolesEnum.RS.ToString()) ? "bg-teal" :
+                                    ColumnName == "No. of Applications" ? "bg-fuchsia" :
+                                    "bg-yellow-gradient";
+        }
         return colorClass;
     }
     public string IonClass(string ColumnName)
     {
-        string ionClass = ColumnName.Contains(StatusesEnum.Rejected.ToString()) ? "ion ion-android-delete" :
-                               ColumnName.Contains(StatusesEnum.Submit.ToString()) ? "ion ion-edit" :
-                               ColumnName.Contains(StatusesEnum.Approved.ToString()) ? "ion ion-checkmark" :
-                               ColumnName.Contains(StatusesEnum.Completed.ToString()) ? "ion ion-briefcase" :
-                               ColumnName.Contains(RolesEnum.CEO.ToString()) ? "ion ion-person" :
-                               ColumnName.Contains(RolesEnum.Committee.ToString()) ? "ion ion-document" :
-                               ColumnName.Contains("Field Officer") ? "ion ion-person-add" :
-                               ColumnName.Contains(RolesEnum.Finance.ToString()) ? "ion ion-cash" :
-                               ColumnName.Contains(RolesEnum.RS.ToString()) ? "ion ion-eye" :
-                               ColumnName == "No. of Applications" ? "ion ion-bag" :
-                                "ion ion-stats-bar";
+        string ionClass = "ion ion-stats-bar";
+        if (!string.IsNullOrEmpty(ColumnName))
+        {
+            ionClass = ColumnName.Contains(StatusesEnum.Rejected.ToString()) ? "ion ion-android-delete" :
+                                   ColumnName.Contains(StatusesEnum.Submit.ToString()) ? "ion ion-edit" :
+                                   ColumnName.Contains(StatusesEnum.Approved.ToString()) ? "ion ion-checkmark" :
+                                   ColumnName.Contains(StatusesEnum.Completed.ToString()) ? "ion ion-briefcase" :
+                                   ColumnName.Contains(RolesEnum.CEO.ToString()) ? "ion ion-person" :
+                                   ColumnName.Contains(RolesEnum.Committee.ToString()) ? "ion ion-document" :
+                                   ColumnName.Contains("Field Officer") ? "ion ion-person-add" :
+                                   ColumnName.Contains(RolesEnum.Finance.ToString()) ? "ion ion-cash" :
+                                   ColumnName.Contains(RolesEnum.RS.ToString()) ? "ion ion-eye" :
+                                   ColumnName == "No. of Applications" ? "ion ion-bag" :
+                                    "ion ion-stats-bar";
+        }
         return ionClass;
     }
     public short? GetStatusID(string columnName)
     {
         short? statusID = (short?)null;
-        if (columnName.Contains("Approved"))
-            statusID = (short?)StatusesEnum.Approved;
-        if (columnName.Contains("Rejected"))
-            statusID = (short?)StatusesEnum.Rejected;
-        if (columnName.Contains("Completed"))
-            statusID = (short?)StatusesEnum.Completed;
-        if (columnName.Contains("Submitted"))
-            statusID = (short?)StatusesEnum.Submit;
+        if (!string.IsNullOrEmpty(columnName))
+        {
+            if (columnName.Contains("Approved"))
+                statusID = (short?)StatusesEnum.Approved;
+            if (columnName.Contains("Rejected"))
+                statusID = (short?)StatusesEnum.Rejected;
+            if (columnName.Contains("Completed"))
+                statusID = (short?)StatusesEnum.Completed;
+            if (columnName.Contains("Submitted"))
+                statusID = (short?)StatusesEnum.Submit;
+        }
         return statusID;
     }
     public short? GetRoleID(string columnName)
     {
         short? roleID = (short?)null;
-        if (columnName.Contains("CEO"))
-            roleID = (short?)RolesEnum.CEO;
-        if (columnName.Contains("RS"))
-            roleID = (short?)RolesEnum.RS;
-        if (columnName.Contains("Committee"))
-            roleID = (short?)RolesEnum.Committee;
-        if (columnName.Contains("Finance"))
-            roleID = (short?)RolesEnum.Finance;
-        if (columnName.Contains("Head Field Officer"))
-            roleID = (short?)RolesEnum.HeadFieldWorker;
-        if (columnName.Contains("Field Officer"))
-            roleID = (short?)RolesEnum.FieldWorker;
-        if (columnName.Contains("Admin"))
-            roleID = (short?)RolesEnum.FieldWorker;
+        if (!string.IsNullOrEmpty(columnName))
+        {
+            if (columnName.Contains("CEO"))
+                roleID = (short?)RolesEnum.CEO;
+            if (columnName.Contains("RS"))
+                roleID = (short?)RolesEnum.RS;
+            if (columnName.Contains("Committee"))
+                roleID = (short?)RolesEnum.Committee;
+            if (columnName.Contains("Finance"))
+                roleID = (short?)RolesEnum.Finance;
+            if (columnName.Contains("Head Field Officer"))
+                roleID = (short?)RolesEnum.HeadFieldWorker;
+            if (columnName.Contains("Field Officer"))
+                roleID = (short?)RolesEnum.FieldWorker;
+            if (columnName.Contains("Admin"))
+                roleID = (short?)RolesEnum.FieldWorker;
+        }
         return roleID;
     }
     public short? GetHierarchicalRoleID(string columnName)
     {
         short? roleID = (short?)null;
-        if (columnName.Contains("RS"))
-            roleID = (short?)RolesEnum.Committee;
-        if (columnName.Contains("Committee"))
-            roleID = (short?)RolesEnum.FieldWorker;
-        if (columnName.Contains("Finance"))
-            roleID = (short?)RolesEnum.RS;
+        if (!string.IsNullOrEmpty(columnName))
+        {
+            if (columnName.Contains("RS"))
+                roleID = (short?)RolesEnum.Committee;
+            if (columnName.Contains("Committee"))
+                roleID = (short?)RolesEnum.FieldWorker;
+            if (columnName.Contains("Finance"))
+                roleID = (short?)RolesEnum.RS;
+        }
         return roleID;
     }
     public short? GetHierarchicalStatusID(string columnName)
     {
         short? statusID = (short?)null;
-        if (columnName.Contains("RS"))
-            statusID = (short?)StatusesEnum.Approved;
-        if (columnName.Contains("Committee"))
-            statusID = (short?)StatusesEnum.Submit;
-        if (columnName.Contains("Finance"))
-            statusID = (short?)StatusesEnum.Approved;
+        if (!string.IsNullOrEmpty(columnName))
+        {
+            if (columnName.Contains("RS"))
+                statusID = (short?)StatusesEnum.Approved;
+            if (columnName.Contains("Committee"))
+                statusID = (short?)StatusesEnum.Submit;
+            if (columnName.Contains("Finance"))
+                statusID = (short?)StatusesEnum.Approved;
+        }
         return statusID;
     }
 }
