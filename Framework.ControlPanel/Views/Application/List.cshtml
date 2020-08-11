@@ -56,13 +56,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
         $("#btnSearch").click(function () {
-            $.ajax({
-                data: $("#searchForm").serialize(),
-                url: "/Application/List",
-                type: "GET"
-            }).done(function (data) {
-                $("#listDiv").html(data);
-            })
+            Search();
         });
         $("#cbx_enterprise").click(function () {
             if ($(this).prop("checked")) {
@@ -73,4 +67,31 @@
             }
         });
     });
+    function AddLoader() {
+        $(".loader").css("display", "block");
+        $("#listing_table").css("opacity", "0.1");
+    }
+    function RemoveLoader() {
+        $(".loader").css("display", "none");
+        $("#listing_table").css("opacity", "1");
+    }
+
+    function Search(pageNo, pageSize) {
+        AddLoader();
+        var url = "";
+        if (pageNo == undefined && pageSize == undefined) {
+            url = "/Application/List?pageNo='@Model.PageNo'&pageSize='@Model.PageSize'";
+        }
+        else {
+            url = "/Application/List?pageNo=" + pageNo + "&pageSize=" + pageSize;
+        }
+        $.ajax({
+            data: $("#searchForm").serialize(),
+            url: url,
+            type: "GET"
+        }).done(function (data) {
+            $("#listDiv").html(data);
+            RemoveLoader();
+        });
+    }
 </script>

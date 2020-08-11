@@ -36,6 +36,7 @@ namespace Framework.ControlPanel.Models
         public string Enterprise { get; set; }
         public string Ration { get; set; }
         public string Latlng { get; set; }
-
+        public int PageNo { get; set; }
+        public int PageSize { get; set; }
     }
 }

@@ -443,7 +443,7 @@ namespace Framework.ControlPanel.Controllers
             result.Data = "Success";
             return result;
         }
-        public ActionResult List(string applicantName, string cnic, string contactNo, string Latlng, string enterprise, string date, short? statusID, short? searchRoleID)
+        public ActionResult List(string applicantName, string cnic, string contactNo, string Latlng, string enterprise, string date, short? statusID, short? searchRoleID, int? pageNo, int? pageSize)
         {
             ApplicationListModel model = new ApplicationListModel();
             int userID = Authentication.Instance.User.UserID;
@@ -459,7 +459,11 @@ namespace Framework.ControlPanel.Controllers
             model.ContactNo = contactNo;
             model.Enterprise = enterprise;
             model.Latlng = Latlng;
-            model.Applications = ApplicationServices.Instance.GetApplication(applicantName, cnic, contactNo, whereClause, statusID, searchRoleID, enterprise, date, organizationID);
+            pageNo = pageNo ?? 1;
+            pageSize = pageSize ?? 10;
+            model.PageNo = pageNo.Value;
+            model.PageSize = pageSize.Value;
+            model.Applications = ApplicationServices.Instance.GetApplication(applicantName, cnic, contactNo, whereClause, statusID, searchRoleID, enterprise, date, organizationID, pageNo, pageSize);
             if (Request.IsAjaxRequest())
             {
                 return PartialView("_List", model);

@@ -168,7 +168,7 @@ namespace Framework.Application.Services
                 return context.Fetch<Shared.DataServices.Application>(ppSql).FirstOrDefault();
             }
         }
-        public List<ApplicationListEntity> GetApplication(string applicantName, string cnic, string contactNo, string whereClause, short? statusID, short? roleID, string enterprise, string date,int OrganizationID)
+        public List<ApplicationListEntity> GetApplication(string applicantName, string cnic, string contactNo, string whereClause, short? statusID, short? roleID, string enterprise, string date,int OrganizationID, int? pageNo, int? pageSize)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -190,11 +190,12 @@ namespace Framework.Application.Services
 									(Select Top 1 A.Reason From Approvals A Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) Reason,
                                     (Select Top 1 A.UserID From Approvals A Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) UserID,
 	                                U.FullName CreatedBy,
-	                                APP.Date
+	                                APP.Date,
+									Count(0) Over() TotalItems
                                 From Applications APP
                                 Inner Join Users U
                                 ON APP.CreatedBy = U.UserID " + whereClause + " Where APP.OrganizationID=@0 ) X", OrganizationID);
-                //ppSql = ppSql.Where("");
+                //ppSql = ppSql.Where("");)
                 if (!string.IsNullOrEmpty(applicantName)) { ppSql = ppSql.Where("X.ApplicantName = @0", applicantName); }
                 if (!string.IsNullOrEmpty(cnic)) { ppSql = ppSql.Where("X.CNIC = @0", cnic); }
                 if (!string.IsNullOrEmpty(contactNo)) { ppSql = ppSql.Where("X.ContactNo = @0", contactNo); }
@@ -202,6 +203,8 @@ namespace Framework.Application.Services
                 if (roleID.HasValue) { ppSql = ppSql.Where("X.UserID IN (Select UserID From UserRoles Where RoleID = @0)", roleID.Value); }
                 if (!string.IsNullOrEmpty(enterprise) && enterprise == "true") { ppSql = ppSql.Where("X.Enterprise = @0", enterprise); }
                 if (!string.IsNullOrEmpty(date)) { ppSql = ppSql.Where("X.Date <= @0", date); }
+                ppSql = ppSql.OrderBy("1 Desc");
+                if (pageNo.HasValue && pageSize.HasValue) { ppSql = ppSql.Paginate(pageNo.Value, pageSize.Value); }
                 return context.Fetch<ApplicationListEntity>(ppSql);
             }
         }
@@ -1158,6 +1161,7 @@ namespace Framework.Application.Services
         public string Latlng { get; set; }
         public string Ration { get; set; }
         public DateTime Date { get; set; }
+        public int TotalItems { get; set; }
     }
 
 
