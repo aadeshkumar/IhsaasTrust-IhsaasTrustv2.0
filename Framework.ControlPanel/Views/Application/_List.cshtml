@@ -4,6 +4,14 @@
 @using Framework.ControlPanel.CommonCode.Helpers
 @model ApplicationListModel
 <style>
+
+    .paginate_button:hover{
+        font: 15px;
+        background-color: #000000;
+        color: white;
+      
+}    
+
     .centeredOverlay {
         position: absolute;
         background: white;
@@ -30,17 +38,16 @@
         margin-top: 400px;
     }
 
-    keyframes spin {
-        0%
+    /*keyframes spin {
+        
 
-    {
+
         transform: rotate(0deg);
-    }
-
-    100% {
+   
+  
         transform: rotate(360deg);
-    }
-    }
+   
+    }*/
 </style>
 <div class="wrapper">
     <div class="centeredOverlay loader" style="display:none;"></div>
@@ -158,20 +165,40 @@
             </table>
             <div class="dataTables_info" id="listing_table_info" role="status" aria-live="polite">Showing @Model.PageNo to @(Model.PageNo * Model.PageSize) of @Model.Applications[0].TotalItems entries</div>
             <div class="dataTables_paginate paging_simple_numbers" id="listing_table_paginate">
-                <a class="paginate_button previous disabled" aria-controls="listing_table" data-dt-idx="0" tabindex="0" id="listing_table_previous">Previous</a>
-                <span>
-                    @{
-                        int totalPages = Model.Applications[0].TotalItems / Model.PageSize;
+
+                @{
+                    int pageNo = Model.PageNo;
+
+                    int totalPages;
+
+                    if (Model.Applications[0].TotalItems % 10 == 0) {
+
+                         totalPages = Model.Applications[0].TotalItems / Model.PageSize;
                     }
-                    @for (int page = Model.PageNo; page <= (((Model.PageNo + 10) < totalPages - 1) ? Model.PageNo + 10 : totalPages - 1); page++)
+                    else{
+                         totalPages = (Model.Applications[0].TotalItems / Model.PageSize) + 1;
+                    }
+                }
+                @if (pageNo > 1)
+                {
+                    <a class="paginate_button previous button" style="width:40px; height:40px; padding: 10px 8px; border-radius: 2px;" aria-controls="listing_table" data-dt-idx="0" tabindex="0" href="@Url.Action("List","Application", new { pageNo = pageNo - 1 })" id="listing_table_previous">Previous</a>
+                }
+
+                <span>
+                  
+                    @for (int page = Model.PageNo; page <= (((Model.PageNo + 10) < totalPages) ? Model.PageNo + 10 : totalPages); page++)
                     {
                         string className = Model.PageNo == page ? "current" : string.Empty;
-                        <a class="paginate_button @className" aria-controls="listing_table" data-dt-idx="@page" tabindex="0" onclick="Search(@page,@Model.PageSize)" style="cursor:pointer;">@page</a>
+                        <button class="paginate_button @className button" aria-controls="listing_table" data-dt-idx="@page" tabindex="0" onclick="Search(@page,@Model.PageSize)" style="cursor:pointer; width:40px; height:40px">@page</button>
                     }
                     <span class="ellipsis">…</span>
-                    <a class="paginate_button " aria-controls="listing_table" data-dt-idx="6" tabindex="0" onclick="Search(@(totalPages-1),@Model.PageSize)" style="cursor:pointer;">@(totalPages-1)</a>
+                    <button class="paginate_button button" aria-controls="listing_table" data-dt-idx="6" tabindex="0" onclick="Search(@(totalPages),@Model.PageSize)" style="cursor:pointer; width:40px; height:40px ">@(totalPages)</button>
                 </span>
-                <a class="paginate_button next" aria-controls="listing_table" data-dt-idx="7" tabindex="0" id="listing_table_next">Next</a>
+
+                @if (pageNo < totalPages)
+                {
+                    <a class="paginate_button next button" style="width:40px; height:40px; padding: 10px 8px; border-radius: 2px;" aria-controls="listing_table" data-dt-idx="7" tabindex="0" href="@Url.Action("List","Application", new { pageNo = pageNo + 1 })" id="listing_table_next">Next</a>
+                }
             </div>
         </div>
     </div>
