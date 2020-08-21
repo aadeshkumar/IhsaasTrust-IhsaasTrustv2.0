@@ -94,7 +94,7 @@
                                 var fieldValue = Model.FieldValues.Where(x => x.ApplicationID == Model.ApplicationID && field.FieldID == x.FieldID) != null && Model.FieldValues.Where(x => x.ApplicationID == Model.ApplicationID && field.FieldID == x.FieldID).Count() != 0 ? Model.FieldValues.Where(x => x.ApplicationID == Model.ApplicationID && field.FieldID == x.FieldID).FirstOrDefault() : new FieldValue { FieldValueID = 0, Data = "" };
                                 string type = @Model.FieldTypes.Where(x => x.FieldTypeID == field.FieldTypeID).Select(x => x.FieldTypeName).FirstOrDefault().ToLower();
                                 string required = field.IsRequired ? "required=required" : string.Empty;
-                                string MaxLength = !string.IsNullOrEmpty(field.MaxLength) ? string.Format("maxlength={0}", field.MaxLength) : string.Empty;
+                                string MaxLength = "20"; //!string.IsNullOrEmpty(field.MaxLength) ? string.Format("maxlength={0}", field.MaxLength) : string.Empty;
 
                                 <div class="form-group">
                                     <div class="row" rel-row="@field.FieldName">

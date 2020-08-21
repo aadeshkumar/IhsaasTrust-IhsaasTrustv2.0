@@ -5,12 +5,11 @@
 @model ApplicationListModel
 <style>
 
-    .paginate_button:hover{
+    .paginate_button:hover {
         font: 15px;
         background-color: #000000;
         color: white;
-      
-}    
+    }
 
     .centeredOverlay {
         position: absolute;
@@ -39,14 +38,14 @@
     }
 
     /*keyframes spin {
-        
+
 
 
         transform: rotate(0deg);
-   
-  
+
+
         transform: rotate(360deg);
-   
+
     }*/
 </style>
 <div class="wrapper">
@@ -63,7 +62,15 @@
                         <th>Created By</th>
                         <th>Date</th>
                         <th>Status</th>
-                        <th>Enterprise Facilitation</th>
+                        @if (Model.OrganizationID != 1003)
+                        {
+                            <th>Enterprise Facilitation</th>
+                        }
+                        else
+                        {
+                            <th>Ibrahim Goth</th>
+                            <th>Mehran Town</th>
+                        }
                         <th>Reason</th>
                         <th>Timeline</th>
                         <th>Location</th>
@@ -92,28 +99,80 @@
                                 <td>@application.CreatedBy</td>
                                 <td>@application.Date</td>
                                 <td><span title="@application.Reason">@application.Status.IfNullShowAlternative("-")</span></td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(application.Enterprise) && application.Enterprise == "true")
-                                    {
-                                        <div style="margin:auto;">
-                                            @*<button type="button" class="btn btn-default btn-sm">
-                                                    <i class="fa fa-square text-green"></i>
-                                                </button>*@
-                                            <span class="label label-success">Yes</span>
+                                @if (Model.OrganizationID != 1003)
+                                {
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(application.Enterprise) && application.Enterprise == "true")
+                                        {
+                                            <div style="margin:auto;">
+                                                @*<button type="button" class="btn btn-default btn-sm">
+                                                        <i class="fa fa-square text-green"></i>
+                                                    </button>*@
+                                                <span class="label label-success">Yes</span>
 
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div style="text-align:center;">
-                                            @*<button type="button" class="btn btn-default btn-sm">
-                                                    <i class="fa fa-square text-red"></i>
-                                                </button>*@
-                                            <span class="label label-danger">No</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="text-align:center;">
+                                                @*<button type="button" class="btn btn-default btn-sm">
+                                                        <i class="fa fa-square text-red"></i>
+                                                    </button>*@
+                                                <span class="label label-danger">No</span>
 
-                                        </div>
-                                    }
-                                </td>
+                                            </div>
+                                        }
+                                    </td>
+                                }
+                                @if (Model.OrganizationID == 1003)
+                                {
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(application.IbrahimGoth) && application.IbrahimGoth == "true")
+                                        {
+
+                                            <div style="margin:auto;">
+                                                @*<button type="button" class="btn btn-default btn-sm">
+                                                        <i class="fa fa-square text-green"></i>
+                                                    </button>*@
+                                                <span class="label label-success">Yes</span>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="text-align:center;">
+                                                @*<button type="button" class="btn btn-default btn-sm">
+                                                        <i class="fa fa-square text-red"></i>
+                                                    </button>*@
+                                                <span class="label label-danger">No</span>
+
+                                            </div>
+
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(application.MehranTown) && application.MehranTown == "true")
+                                        {
+                                            <div style="margin:auto;">
+                                                @*<button type="button" class="btn btn-default btn-sm">
+                                                        <i class="fa fa-square text-green"></i>
+                                                    </button>*@
+                                                <span class="label label-success">Yes</span>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="text-align:center;">
+                                                @*<button type="button" class="btn btn-default btn-sm">
+                                                        <i class="fa fa-square text-red"></i>
+                                                    </button>*@
+                                                <span class="label label-danger">No</span>
+
+                                            </div>
+                                        }
+                                    </td>
+                                }
 
                                 <td>@application.Reason.IfNullShowAlternative("-")</td>
                                 <td>
@@ -171,12 +230,14 @@
 
                     int totalPages;
 
-                    if (Model.Applications[0].TotalItems % 10 == 0) {
+                    if (Model.Applications[0].TotalItems % 10 == 0)
+                    {
 
-                         totalPages = Model.Applications[0].TotalItems / Model.PageSize;
+                        totalPages = Model.Applications[0].TotalItems / Model.PageSize;
                     }
-                    else{
-                         totalPages = (Model.Applications[0].TotalItems / Model.PageSize) + 1;
+                    else
+                    {
+                        totalPages = (Model.Applications[0].TotalItems / Model.PageSize) + 1;
                     }
                 }
                 @if (pageNo > 1)
@@ -185,7 +246,7 @@
                 }
 
                 <span>
-                  
+
                     @for (int page = Model.PageNo; page <= (((Model.PageNo + 10) < totalPages) ? Model.PageNo + 10 : totalPages); page++)
                     {
                         string className = Model.PageNo == page ? "current" : string.Empty;

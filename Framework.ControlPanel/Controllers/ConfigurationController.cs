@@ -99,12 +99,12 @@ namespace Framework.ControlPanel.Controllers
                     //role.RoleID = 1;
                     User user = new User();
                     user.OrganizationID = AuthenticationServices.Instance.GetNewOrganizationID(a.SubscriptionPackageID, a.Email);
-                    user.FullName = a.OrganizationName;
-                    user.DisplayName = a.OrganizationName;
+                    //user.FullName = a.OrganizationName;
+                    //user.DisplayName = a.OrganizationName;
                     user.PictureURL = SubscriptionRequest.Logo;
-                    user.OrganizationName = SubscriptionRequest.RequestOrganizationName;
-                    user.Email = a.Email;
-                    user.Password = "BP0qaZXHfNc=";
+                    //user.OrganizationName = SubscriptionRequest.RequestOrganizationName;
+                    //user.Email = a.Email;
+                    //user.Password = "BP0qaZXHfNc=";
                     user.CreatedBy = 1;
                     user.StatusID = 1;
 
@@ -115,7 +115,7 @@ namespace Framework.ControlPanel.Controllers
                     userRole.OrganizationID = user.OrganizationID;
                     userRole.CreatedBy = 1;
                     userRole.CreatedOn = DateTime.Now;
-                    userRole.UserID = AuthenticationServices.Instance.GetNewOrganizationUserID(user.FullName, user.Email, user.Password);
+                    userRole.UserID = AuthenticationServices.Instance.GetNewOrganizationUserID(user.FullName, "", "");// user.Email, user.Password);
                     AuthenticationServices.Instance.NewUserRoleOrganization(userRole);
                     message = "Saved";
 

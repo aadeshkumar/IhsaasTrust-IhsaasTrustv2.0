@@ -463,6 +463,7 @@ namespace Framework.ControlPanel.Controllers
             pageSize = pageSize ?? 10;
             model.PageNo = pageNo.Value;
             model.PageSize = pageSize.Value;
+            model.OrganizationID = organizationID;
             model.Applications = ApplicationServices.Instance.GetApplication(applicantName, cnic, contactNo, whereClause, statusID, searchRoleID, enterprise, date, organizationID, pageNo, pageSize);
             if (Request.IsAjaxRequest())
             {

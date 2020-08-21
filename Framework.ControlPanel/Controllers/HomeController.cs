@@ -38,7 +38,7 @@ namespace Framework.ControlPanel.Controllers
             model.StatusCount = ApplicationServices.Instance.GetApplicationStatusess(fromDate, toDate, organizationID, null);
             model.PendingInFinance = ApplicationServices.Instance.PendingInFinances(fromDate, toDate, organizationID, null);
             model.InReviewOfCommittee = ApplicationServices.Instance.InReviewOfCommittees(fromDate, toDate, organizationID, null);
-            model.NoOfStream = ApplicationServices.Instance.GetNoOfStream(fromDate, toDate, null);
+            model.NoOfStream = ApplicationServices.Instance.GetNoOfStream(fromDate, toDate, null, organizationID);
 
             return PartialView("_ChartsPartialView", model);
         }
@@ -57,17 +57,16 @@ namespace Framework.ControlPanel.Controllers
             {
                 model.NoOfApplications = 0;
             }
-
+            organizationID = OrganizationID.HasValue ? OrganizationID.Value : organizationID;
             if (OrganizationID.HasValue || (Authentication.Instance.User.RoleID == (short)RolesEnum.CEO || Authentication.Instance.User.RoleID == (short)RolesEnum.HeadFieldWorker))
             {
-                organizationID = OrganizationID.HasValue ? OrganizationID.Value : organizationID;
                 userID = OrganizationID.HasValue ? null : userID;
                 model.NoOfApplications = ApplicationServices.Instance.GetNoOfApplicationss(fromDate, toDate, organizationID, userID);
                 model.NoOfApplicationsByUsers = ApplicationServices.Instance.GetNoOfApplicationsByUserss(fromDate, toDate, organizationID, userID);
                 model.StatusCount = ApplicationServices.Instance.GetApplicationStatusess(fromDate, toDate, organizationID, userID);
                 model.PendingInFinance = ApplicationServices.Instance.PendingInFinances(fromDate, toDate, organizationID, userID);
                 model.InReviewOfCommittee = ApplicationServices.Instance.InReviewOfCommittees(fromDate, toDate, organizationID, userID);
-                model.NoOfStream = ApplicationServices.Instance.GetNoOfStream(fromDate, toDate, userID);
+                model.NoOfStream = ApplicationServices.Instance.GetNoOfStream(fromDate, toDate, userID, organizationID);
                 model.NoOfDelayedCases = ApplicationServices.Instance.GetNoOfDelayedCasess(organizationID);
                 model.TotalAndConcludedApplications = ApplicationServices.Instance.GetTotalAndConcludedApplicationss(organizationID);
                 model.ActiveOrganization = ApplicationServices.Instance.GetActiveOrganizations();
@@ -79,7 +78,7 @@ namespace Framework.ControlPanel.Controllers
                 model.StatusCount = ApplicationServices.Instance.GetApplicationStatuses(fromDate, toDate, userID);
                 model.PendingInFinance = ApplicationServices.Instance.PendingInFinance(fromDate, toDate, userID);
                 model.InReviewOfCommittee = ApplicationServices.Instance.InReviewOfCommittee(fromDate, toDate, userID);
-                model.NoOfStream = ApplicationServices.Instance.GetNoOfStream(fromDate, toDate, userID);
+                model.NoOfStream = ApplicationServices.Instance.GetNoOfStream(fromDate, toDate, userID, organizationID);
                 model.NoOfDelayedCases = ApplicationServices.Instance.GetNoOfDelayedCases();
                 model.TotalAndConcludedApplications = ApplicationServices.Instance.GetTotalAndConcludedApplications();
                 model.ActiveOrganization = ApplicationServices.Instance.GetActiveOrganizations();

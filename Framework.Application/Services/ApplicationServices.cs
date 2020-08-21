@@ -176,7 +176,7 @@ namespace Framework.Application.Services
                         .Append(@";With FV 
                                 AS
                                 (
-	                                Select ApplicationID, Data, FieldID From FieldValues Where FieldID IN (28,30,32,2155,1119)
+	                                Select ApplicationID, Data, FieldID From FieldValues Where FieldID IN (28,30,32,2155,1119,2119,2120)
                                 ) Select * From (
                                 Select 
 	                                APP.ApplicationID,
@@ -185,6 +185,8 @@ namespace Framework.Application.Services
 	                                (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 32) ContactNo,
                                     (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2155) Latlng,
 	                                (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 1119) Enterprise,
+	                                (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2119) IbrahimGoth,
+	                                (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2120) MehranTown,
 	                                (Select Top 1 S.StatusName + ' (' + (Select Top 1 FullName From Users Where UserID = A.UserID) + ')' From Approvals A Inner Join Statuses S ON A.StatusID = S.StatusID Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) [Status],
 									(Select Top 1 S.StatusID From Approvals A Inner Join Statuses S ON A.StatusID = S.StatusID Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) [StatusID],
 									(Select Top 1 A.Reason From Approvals A Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) Reason,
@@ -650,7 +652,7 @@ namespace Framework.Application.Services
                 return context.Fetch<int>(sql).FirstOrDefault();
             }
         }
-        public List<NoOfStreamEntity> GetNoOfStream(string fromDate, string toDate, int? userID)
+        public List<NoOfStreamEntity> GetNoOfStream(string fromDate, string toDate, int? userID, int organizationID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -664,10 +666,20 @@ namespace Framework.Application.Services
                     whereClause += string.Format("AP.CreatedBy = {0} AND", userID.Value);
                 }
                 PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfStream, FV.FieldID, F.FieldName
+                if (organizationID != 1003)
+                {
+                    sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfStream, FV.FieldID, F.FieldName
                                                     From FieldValues FV Inner Join Fields F ON F.FieldID = FV.FieldID
                                                     Where FV.FieldID IN (101,95,96,96,97) AND (FV.[Data] = 'true' OR FV.[Data] != '')
                                                     Group By FV.FieldID, F.FieldName");
+                }
+                else
+                {
+                    sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfStream, FV.FieldID, F.FieldName
+                                                    From FieldValues FV Inner Join Fields F ON F.FieldID = FV.FieldID
+                                                    Where FV.FieldID IN (2119,2120) AND (FV.[Data] = 'true' OR FV.[Data] != '' AND F.OrganizationID = @0)
+                                                    Group By FV.FieldID, F.FieldName", organizationID);
+                }
                 return context.Fetch<NoOfStreamEntity>(sql);
             }
         }
@@ -1158,6 +1170,8 @@ namespace Framework.Application.Services
         public short? StatusID { get; set; }
         public string CreatedBy { get; set; }
         public string Enterprise { get; set; }
+        public string IbrahimGoth { get; set; }
+        public string MehranTown { get; set; }
         public string Latlng { get; set; }
         public string Ration { get; set; }
         public DateTime Date { get; set; }
