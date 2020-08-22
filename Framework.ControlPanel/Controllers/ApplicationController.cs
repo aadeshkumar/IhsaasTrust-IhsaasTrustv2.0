@@ -15,6 +15,8 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Http;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace Framework.ControlPanel.Controllers
 {
@@ -73,10 +75,13 @@ namespace Framework.ControlPanel.Controllers
                         var application = ApplicationServices.Instance.GetApplication(ApplicationID);
                         recipientUsers = ApplicationServices.Instance.FindEmail(application.CreatedBy.Value);
                     }
-                    else if(approvalRequest.HasValue && approvalRequest.Value == 3)
+                    else if (approvalRequest.HasValue && approvalRequest.Value == 3)
                     {
-                        recipientUsers.Add(new User() {
-                            FullName = "Shahzeb Irshad", RecipientEmail = "shahzeb.irshad@ihsaas.pk", UserID = 39
+                        recipientUsers.Add(new User()
+                        {
+                            FullName = "Shahzeb Irshad",
+                            RecipientEmail = "shahzeb.irshad@ihsaas.pk",
+                            UserID = 39
                         });
                     }
                     else
@@ -99,12 +104,12 @@ namespace Framework.ControlPanel.Controllers
                     //mailMessage.To.Add(ru.RecipientEmail);
                     ////mailMessage.CC.Add("shahzeb.irshad@ihsaas.pk");
                     //mailMessage.From = new MailAddress("ihsaastrust@gmail.com");
-                    
-                   
-                    //mailMessage.IsBodyHtml = true;
-                   
 
-                    
+
+                    //mailMessage.IsBodyHtml = true;
+
+
+
                     //using (var smtpClient = new SmtpClient())
                     //{
                     //    smtpClient.Host = "smtp.gmail.com";
@@ -123,9 +128,9 @@ namespace Framework.ControlPanel.Controllers
             try
             {
                 int id = Authentication.Instance.User.UserID;
-                var task = Task.Run(async () => await SendEmails(id,UserID, Subject, FieldOfficer, ApplicantName, CNIC, ContactNo, ApplicationID, roleID, Reason, EmailUserID, approvalRequest));
+                var task = Task.Run(async () => await SendEmails(id, UserID, Subject, FieldOfficer, ApplicantName, CNIC, ContactNo, ApplicationID, roleID, Reason, EmailUserID, approvalRequest));
                 result.Data = "success";
-                
+
             }
             catch (Exception ex)
             {
@@ -150,7 +155,7 @@ namespace Framework.ControlPanel.Controllers
 
             return result;
         }
-        public static string SendSMSs( string MessageText, string UserID, int? MobileUserID)
+        public static string SendSMSs(string MessageText, string UserID, int? MobileUserID)
         {
             //var toNumber = ;
             ////if (MobileUserID.HasValue)
@@ -223,9 +228,9 @@ namespace Framework.ControlPanel.Controllers
         public ActionResult Index(int? applicationID, bool edit = false)
         {
             int organizationID = Authentication.Instance.User.OrganizationID;
-           
+
             ApplicationModel model = new ApplicationModel();
-        
+
             if ((Request.UrlReferrer != null && Request.UrlReferrer.AbsolutePath.ToLower().Contains("application/approval")
                 || Request.UrlReferrer != null && Request.UrlReferrer.AbsolutePath.ToLower().Contains("application/list"))
                 && !(Authentication.Instance.User.RoleID == (short)RolesEnum.FieldWorker) && applicationID.HasValue)
@@ -247,7 +252,7 @@ namespace Framework.ControlPanel.Controllers
             }
 
             return View("Index", model);
-            
+
         }
         public JsonResult UpdateApplication(string Data, int FieldID, int ApplicationID)
         {
@@ -291,7 +296,7 @@ namespace Framework.ControlPanel.Controllers
                 var cnicExist = false;
                 var contactNoExist = false;
                 var EndDate = DateTime.Now;
-                int cnicDays=0,contactDays=0;
+                int cnicDays = 0, contactDays = 0;
                 string cnic = form["fv0_fid30"] != null ? form["fv0_fid30"] : string.Empty;
                 if (!string.IsNullOrEmpty(cnic))
                 {
@@ -314,7 +319,7 @@ namespace Framework.ControlPanel.Controllers
                     }
                 }
 
-                bool IsDeleted=false;
+                bool IsDeleted = false;
                 foreach (var key in form.Keys)
                 {
                     if (key.ToString() == "ApplicationID")
@@ -332,7 +337,7 @@ namespace Framework.ControlPanel.Controllers
                         }
                         else
                         {
-                            if (ApplicationServices.Instance.RejectionStatus(applicationID) && Authentication.Instance.User.RoleID==2)
+                            if (ApplicationServices.Instance.RejectionStatus(applicationID) && Authentication.Instance.User.RoleID == 2)
                             {
                                 IsDeleted = true;
                             }
@@ -401,24 +406,24 @@ namespace Framework.ControlPanel.Controllers
                             //}
                             //else
                             //{
-                                fieldValues.Add(new FieldValue
-                                {
-                                    ApplicationID = applicationID,
-                                    Data = data,
-                                    FieldValueID = fieldValueID,
-                                    FieldID = fieldID,
-                                    ModifiedBy = userID,
-                                    ModifiedOn = DateTime.Now
-                                });
+                            fieldValues.Add(new FieldValue
+                            {
+                                ApplicationID = applicationID,
+                                Data = data,
+                                FieldValueID = fieldValueID,
+                                FieldID = fieldID,
+                                ModifiedBy = userID,
+                                ModifiedOn = DateTime.Now
+                            });
                             //}
                         }
                     }
                 }
-                
+
                 ApplicationServices.Instance.SaveUpdateFieldValues(fieldValues, ref message);
                 //ApplicationServices.Instance.SaveFieldValues(newfieldValues);
             }
-            
+
             catch (Exception ex)
             {
                 //message = string.Format("Unable to create fields value, reason: {0}", ex.Message);
@@ -443,7 +448,35 @@ namespace Framework.ControlPanel.Controllers
             result.Data = "Success";
             return result;
         }
-        public ActionResult List(string applicantName, string cnic, string contactNo, string Latlng, string enterprise, string date, short? statusID, short? searchRoleID, int? pageNo, int? pageSize)
+        //public ActionResult List(string applicantName, string cnic, string contactNo, string Latlng, string enterprise, string date, short? statusID, short? searchRoleID, int? pageNo, int? pageSize)
+        //{
+        //    ApplicationListModel model = new ApplicationListModel();
+        //    int userID = Authentication.Instance.User.UserID;
+        //    int roleID = Authentication.Instance.User.RoleID;
+        //    int organizationID = Authentication.Instance.User.OrganizationID;
+        //    string whereClause = string.Empty;
+        //    if (roleID == (short)RolesEnum.FieldWorker)
+        //    {
+        //        whereClause = " AND APP.CreatedBy = " + userID;
+        //    }
+        //    model.ApplicantName = applicantName;
+        //    model.CNIC = cnic;
+        //    model.ContactNo = contactNo;
+        //    model.Enterprise = enterprise;
+        //    model.Latlng = Latlng;
+        //    pageNo = pageNo ?? 1;
+        //    pageSize = pageSize ?? 10;
+        //    model.PageNo = pageNo.Value;
+        //    model.PageSize = pageSize.Value;
+        //    model.OrganizationID = organizationID;
+        //    model.Applications = ApplicationServices.Instance.GetApplication(applicantName, cnic, contactNo, whereClause, statusID, searchRoleID, enterprise, date, organizationID, pageNo, pageSize);
+        //    if (Request.IsAjaxRequest())
+        //    {
+        //        return PartialView("_List", model);
+        //    }
+        //    return View("List", model);
+        //}
+        public ActionResult ListV1(string applicantName, string cnic, string contactNo, string Latlng, string enterprise, string date, short? statusID, short? searchRoleID, int? pageNo, int? pageSize)
         {
             ApplicationListModel model = new ApplicationListModel();
             int userID = Authentication.Instance.User.UserID;
@@ -464,15 +497,49 @@ namespace Framework.ControlPanel.Controllers
             model.PageNo = pageNo.Value;
             model.PageSize = pageSize.Value;
             model.OrganizationID = organizationID;
-            model.Applications = ApplicationServices.Instance.GetApplication(applicantName, cnic, contactNo, whereClause, statusID, searchRoleID, enterprise, date, organizationID, pageNo, pageSize);
-            if (Request.IsAjaxRequest())
+            return View("ListV1", model);
+        }
+        public JsonResult ListData(int draw, int start, int length, Dictionary<string, string> search, List<Dictionary<string, string>> order, List<Dictionary<string, string>> columns)
+        {
+            ApplicationListModel model = new ApplicationListModel();
+            int userID = Authentication.Instance.User.UserID;
+            int roleID = Authentication.Instance.User.RoleID;
+            int organizationID = Authentication.Instance.User.OrganizationID;
+            string whereClause = string.Empty;
+            if (roleID == (short)RolesEnum.FieldWorker)
             {
-                return PartialView("_List", model);
+                whereClause = " AND APP.CreatedBy = " + userID;
             }
-            return View("List", model);
+            start = start == 0 ? 1 : (start / length) + 1;
+            model.PageNo = start;
+            model.PageSize = length;
+            model.OrganizationID = organizationID;
+
+            string searchText = string.Empty;
+            search.TryGetValue("value", out searchText);
+
+            string orderByColumn = string.Empty;
+            string orderByDirection = string.Empty;
+
+            order[0].TryGetValue("column", out orderByColumn);
+
+            columns[int.Parse(orderByColumn)].TryGetValue("data", out orderByColumn);
+
+            order[0].TryGetValue("dir", out orderByDirection);
+
+            var jsonResult = ApplicationServices.Instance.GetApplicationJson(whereClause, organizationID, start, length, draw, searchText, orderByColumn, orderByDirection);
+            JavaScriptSerializer j = new JavaScriptSerializer();
+            object jsonData = j.Deserialize(jsonResult, typeof(object));
+
+            MyArray[] root = JsonConvert.DeserializeObject<MyArray[]>(jsonResult);
+
+            JsonResult result = new JsonResult();
+            result.JsonRequestBehavior = JsonRequestBehavior.AllowGet;
+            result.Data = new { draw = draw, recordsTotal = root.Length != 0 ? root[0].TotalItems : 0, recordsFiltered = root.Length != 0 ? root[0].TotalItems : 0, data = jsonData  };
+            return result;
         }
 
-        public ActionResult RationList(string applicantName, string cnic, string contactNo, string enterprise, string Ration,string date, short? statusID, short? searchRoleID)
+        public ActionResult RationList(string applicantName, string cnic, string contactNo, string enterprise, string Ration, string date, short? statusID, short? searchRoleID)
         {
             ApplicationListModel model = new ApplicationListModel();
             int userID = Authentication.Instance.User.UserID;
@@ -488,7 +555,7 @@ namespace Framework.ControlPanel.Controllers
             model.ContactNo = contactNo;
             model.Ration = Ration;
             model.Enterprise = enterprise;
-            
+
             model.Applications = ApplicationServices.Instance.GetApplications(applicantName, cnic, contactNo, whereClause, statusID, searchRoleID, enterprise, date, organizationID);
             if (Request.IsAjaxRequest())
             {
@@ -569,10 +636,10 @@ namespace Framework.ControlPanel.Controllers
         [HttpPost]
         public JsonResult UploadFile(HttpPostedFileBase file)
         {
-            
+
             var abc = Authentication.Instance.User.OrganizationID;
 
-            string folderPath = Server.MapPath("~/Application/" + abc+"//");
+            string folderPath = Server.MapPath("~/Application/" + abc + "//");
 
             if (!Directory.Exists(folderPath))
             {
@@ -604,7 +671,7 @@ namespace Framework.ControlPanel.Controllers
             try
             {
                 ApplicationServices.Instance.ActiveOrganization(OrganizationID);
-               
+
 
             }
             catch (Exception ex)
@@ -667,7 +734,7 @@ namespace Framework.ControlPanel.Controllers
                                         <div style='width:400px;margin:auto;padding-top:10px;'>
                                             <h3>Hi " + fullName + @"!</h3>
                                             <hr />
-                                            <p>" + subject + @" by " + fieldOfficer + @" at "+ DateTime.Now.ToString("MMMM, dd-MMM-yyyy, hh:mm:ss") + @"</p>
+                                            <p>" + subject + @" by " + fieldOfficer + @" at " + DateTime.Now.ToString("MMMM, dd-MMM-yyyy, hh:mm:ss") + @"</p>
                                             <hr />
                                             <p><strong>Application Summary:</strong></p>
                                             <p>
@@ -675,9 +742,9 @@ namespace Framework.ControlPanel.Controllers
                                                 Applicant Name: " + applicantName + @"<br />
                                                 CNIC: " + cnic + @"<br />
                                                 Contact No.: " + contactNo + @"<br />
-                                                Application: <a style='color:#ffffff;' href='http://www.ihsaas.com.pk/portal/application/create?applicationID=" + applicationID + @"' target='_blank'>Link</a> "+ reason + @"
+                                                Application: <a style='color:#ffffff;' href='http://www.ihsaas.com.pk/portal/application/create?applicationID=" + applicationID + @"' target='_blank'>Link</a> " + reason + @"
                                             </p>
-                                           "+ approval + @"
+                                           " + approval + @"
                                             <hr />
                                             <p>Thank You!</p>
                                         </div>

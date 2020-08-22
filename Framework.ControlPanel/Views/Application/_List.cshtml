@@ -83,6 +83,16 @@
                     {
                         foreach (var application in Model.Applications)
                         {
+                            //                    Active = 1,
+                            //Deactived = 2,
+                            //Terminated = 3,
+                            //Submit = 4,
+                            //WaitingForApproval = 5,
+                            //InReview = 6,
+                            //Rejected = 7,
+                            //Approved = 8,
+                            //Completed = 9,
+                            //Closed = 10
                             string disabled = (application.StatusID.HasValue &&
                                 (application.StatusID == (short)StatusesEnum.Submit || application.StatusID == (short)StatusesEnum.Approved || application.StatusID == (short)StatusesEnum.Closed || application.StatusID == (short)StatusesEnum.Completed) || (!string.IsNullOrEmpty(application.Enterprise) && application.Enterprise == "true")) ? "disabled=disabled;" : string.Format("relf-delete={0} onclick=DeleteApplication({0})", application.ApplicationID);
                             string editUrl = disabled == "disabled=disabled;" ? disabled : string.Format("href=/portal/application/create?applicationID={0}&edit=true", application.ApplicationID);
@@ -104,23 +114,11 @@
                                     <td>
                                         @if (!string.IsNullOrEmpty(application.Enterprise) && application.Enterprise == "true")
                                         {
-                                            <div style="margin:auto;">
-                                                @*<button type="button" class="btn btn-default btn-sm">
-                                                        <i class="fa fa-square text-green"></i>
-                                                    </button>*@
-                                                <span class="label label-success">Yes</span>
-
-                                            </div>
+                                            <div style="margin:auto;"><span class="label label-success">Yes</span></div>
                                         }
                                         else
                                         {
-                                            <div style="text-align:center;">
-                                                @*<button type="button" class="btn btn-default btn-sm">
-                                                        <i class="fa fa-square text-red"></i>
-                                                    </button>*@
-                                                <span class="label label-danger">No</span>
-
-                                            </div>
+                                            <div style="text-align:center;"><span class="label label-danger">No</span></div>
                                         }
                                     </td>
                                 }
@@ -176,11 +174,7 @@
 
                                 <td>@application.Reason.IfNullShowAlternative("-")</td>
                                 <td>
-                                    <div style="text-align:center">
-                                        <a href="/Home/Template?ApplicationID=@application.ApplicationID">
-                                            <img style="width:35px;height:35px;" src="~/assets/dist/img/timeline.png" />
-                                        </a>
-                                    </div>
+                                    <div style="text-align:center"><a href="/Home/Template?ApplicationID=@application.ApplicationID"><img style="width:35px;height:35px;" src="~/assets/dist/img/timeline.png" /></a></div>
                                 </td>
                                 <td>
                                     @if (!string.IsNullOrEmpty(application.Latlng))

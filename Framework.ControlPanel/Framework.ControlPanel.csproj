@@ -14492,6 +14492,7 @@
     <Content Include="Views\Home\Organizations.cshtml" />
     <Content Include="Views\Application\RationList.cshtml" />
     <Content Include="Views\Application\_RationList.cshtml" />
+    <Content Include="Views\Application\ListV1.cshtml" />
     <None Include="Web.Release_Prod.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

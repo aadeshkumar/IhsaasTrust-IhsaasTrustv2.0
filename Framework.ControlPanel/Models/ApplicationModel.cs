@@ -40,4 +40,26 @@ namespace Framework.ControlPanel.Models
         public int PageSize { get; set; }
         public int OrganizationID { get; set; }
     }
+    public class MyArray
+    {
+        public int ApplicationID { get; set; }
+        public string ApplicantName { get; set; }
+        public string CNIC { get; set; }
+        public string ContactNo { get; set; }
+        public int TotalItems { get; set; }
+        public string Enterprise { get; set; }
+        public string Status { get; set; }
+        public int StatusID { get; set; }
+        public string Reason { get; set; }
+        public string Timeline { get; set; }
+        public string CreatedBy { get; set; }
+        public string Date { get; set; }
+        public string Edit { get; set; }
+        public string Delete { get; set; }
+    }
+
+    public class Root
+    {
+        public List<MyArray> MyArray { get; set; }
+    }
 }

@@ -61,9 +61,9 @@ namespace Framework.Application.Services
                                      FROM Approvals A where A.RowID = @0 Order by CreatedOn", ID);
                 return context.Fetch<TemplateData>(ppSql);
                 //(Select[Data] From FieldValues Where ApplicationID = @0 AND FieldID = 105) CommitteeReason,
-	               //                 (Select[Data] From FieldValues Where ApplicationID = @0 AND FieldID = 105) RSReason,
-	               //                 (Select[Data] From FieldValues Where ApplicationID = @0 AND FieldID = 105) CEOReason,
-	               //                 (Select[Data] From FieldValues Where ApplicationID = @0 AND FieldID = 105) FinanceReason,
+                //                 (Select[Data] From FieldValues Where ApplicationID = @0 AND FieldID = 105) RSReason,
+                //                 (Select[Data] From FieldValues Where ApplicationID = @0 AND FieldID = 105) CEOReason,
+                //                 (Select[Data] From FieldValues Where ApplicationID = @0 AND FieldID = 105) FinanceReason,
 
             }
         }
@@ -134,7 +134,7 @@ namespace Framework.Application.Services
                 return context.Fetch<FieldType>(ppSql);
             }
         }
-        public List<Field> GetFields(bool isAdmin,int OrganizationID)
+        public List<Field> GetFields(bool isAdmin, int OrganizationID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -168,7 +168,7 @@ namespace Framework.Application.Services
                 return context.Fetch<Shared.DataServices.Application>(ppSql).FirstOrDefault();
             }
         }
-        public List<ApplicationListEntity> GetApplication(string applicantName, string cnic, string contactNo, string whereClause, short? statusID, short? roleID, string enterprise, string date,int OrganizationID, int? pageNo, int? pageSize)
+        public List<ApplicationListEntity> GetApplication(string applicantName, string cnic, string contactNo, string whereClause, short? statusID, short? roleID, string enterprise, string date, int OrganizationID, int? pageNo, int? pageSize)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -208,6 +208,56 @@ namespace Framework.Application.Services
                 ppSql = ppSql.OrderBy("1 Desc");
                 if (pageNo.HasValue && pageSize.HasValue) { ppSql = ppSql.Paginate(pageNo.Value, pageSize.Value); }
                 return context.Fetch<ApplicationListEntity>(ppSql);
+            }
+        }
+
+        public string GetApplicationJson(string whereClause, int OrganizationID, int pageNo, int pageSize, int draw, string search, string orderByColumn, string orderByDirection)
+        {
+            using (var context = DataContextHelper.GetCPDataContext())
+            {
+                var ppSql = PetaPoco.Sql.Builder
+                        .Append(@";With FV 
+                                    AS
+                                    (
+                                        Select ApplicationID, Data, FieldID 
+	                                    From FieldValues 
+	                                    Where FieldID IN (28,30,32,2155,1119,2119,2120)
+                                    ) 
+                                      Select
+                                      data = ISNULL((Select Count(0) Over() TotalItems, ApplicationID, ISNULL(ApplicantName, '') ApplicantName, ISNULL(CNIC, '') CNIC, ISNULL(ContactNo, '') ContactNo, LatLng,
+                                      (CASE WHEN Enterprise = '1' THEN '<div style=text-align:center;color:red;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) Enterprise, 
+                                        [Status],
+                                        StatusID,
+                                        Reason, '<div style=text-align:center><a href=/Home/Template?ApplicationID=' + CAST(ApplicationID AS NVARCHAR(10)) + '><img style=width:40px;height:35px; src=../../../assets/dist/img/timeline.png /></a></div>' Timeline, CreatedBy, Date,
+                                       '<a class=" + "\"btn btn-success\"' + (CASE WHEN (StatusID IS NOT NULL AND (StatusID = 4 OR StatusID = 8 OR StatusID = 9 OR StatusID = 10)) THEN 'disabled=disabled' ELSE 'href=/portal/application/create?applicationID='+CAST(ApplicationID AS NVARCHAR(10)) + '&edit=true' END) " + " + 'style=background:#3C8DBC;border:0;><i class=" + "\"icon-copy fa fa-edit\"" + @"></i></a>' Edit, '<a class=" + "\"btn btn-danger\"' + (CASE WHEN (StatusID IS NOT NULL AND (StatusID = 4 OR StatusID = 8 OR StatusID = 9 OR StatusID = 10)) THEN 'disabled=disabled' ELSE 'relf-delete=' + CAST(ApplicationID AS NVARCHAR(10)) + ' onclick=DeleteApplication('+CAST(ApplicationID AS NVARCHAR(10))+')' END) " + "+'style=background:#3C8DBC;border:0;><i class=" + "\"icon-copy fa fa-trash\"" + @"></i></a>' [Delete]
+                                        From (
+                                                                    Select 
+	                                                                    APP.ApplicationID,
+	                                                                    (Select [Data] From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 28) ApplicantName,
+	                                                                    (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 30) CNIC,
+	                                                                    (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 32) ContactNo,
+                                                                        (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2155) Latlng,
+	                                                                    (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 1119) Enterprise,
+	                                                                    (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2119) IbrahimGoth,
+	                                                                    (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2120) MehranTown,
+	                                                                    (Select Top 1 S.StatusName + ' (' + (Select Top 1 FullName From Users Where UserID = A.UserID) + ')' From Approvals A Inner Join Statuses S ON A.StatusID = S.StatusID Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) [Status],
+									                                    (Select Top 1 S.StatusID From Approvals A Inner Join Statuses S ON A.StatusID = S.StatusID Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) [StatusID],
+									                                    ISNULL((Select Top 1 A.Reason From Approvals A Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc), '-') Reason,
+                                                                        (Select Top 1 A.UserID From Approvals A Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) UserID,
+	                                                                    U.FullName CreatedBy,
+	                                                                    convert(varchar, APP.Date, 109) [Date]
+                                    From Applications APP
+                                    Inner Join Users U
+                                    ON APP.CreatedBy = U.UserID " + whereClause + " Where APP.OrganizationID=@0) X", OrganizationID, draw);
+
+                if (!string.IsNullOrEmpty(search)) { ppSql = ppSql.Where(string.Format("X.ApplicantName LIKE '%{0}%' OR X.CNIC LIKE '%{0}%' OR X.ContactNo LIKE '%{0}%'", search)); }
+                //if (roleID.HasValue) { ppSql = ppSql.Where("X.UserID IN (Select UserID From UserRoles Where RoleID = @0)", roleID.Value); }
+                //if (!string.IsNullOrEmpty(enterprise) && enterprise == "true") { ppSql = ppSql.Where("X.Enterprise = @0", enterprise); }
+                //if (!string.IsNullOrEmpty(date)) { ppSql = ppSql.Where("X.Date <= @0", date); }
+                ppSql = ppSql.OrderBy(string.Format("{0} {1}", orderByColumn, orderByDirection));
+                ppSql = ppSql.Paginate(pageNo, pageSize);
+                ppSql = ppSql.Append(@"FOR JSON PATH), '[]')");
+                return context.Fetch<string>(ppSql).FirstOrDefault();
             }
         }
         public List<ApplicationListEntity> GetApplications(string applicantName, string cnic, string contactNo, string whereClause, short? statusID, short? roleID, string enterprise, string date, int OrganizationID)
@@ -275,7 +325,7 @@ namespace Framework.Application.Services
                 {
                     SaveApproval(userID, application.ApplicationID, (short)StatusesEnum.Submit, false, null, IsDeleted);
                 }
-                if(!enterprise)
+                if (!enterprise)
                 {
                     SaveApproval(userID, application.ApplicationID, (short)StatusesEnum.Submit, false, null, IsDeleted);
                 }
@@ -423,7 +473,7 @@ namespace Framework.Application.Services
         //???
         //??
         //?
-        public int GetNoOfApplicationss(short roleID, int userID,int organizationID)
+        public int GetNoOfApplicationss(short roleID, int userID, int organizationID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -551,7 +601,7 @@ namespace Framework.Application.Services
                 return context.Fetch<int>(sql).FirstOrDefault();
             }
         }
-        public List<NoOfApplicationsByUsersEntity> GetNoOfApplicationsByUserss(string fromDate, string toDate,int organizationID, int? userID)
+        public List<NoOfApplicationsByUsersEntity> GetNoOfApplicationsByUserss(string fromDate, string toDate, int organizationID, int? userID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -570,7 +620,7 @@ namespace Framework.Application.Services
                 return context.Fetch<NoOfApplicationsByUsersEntity>(sql);
             }
         }
-        public List<StatusCountEntity> GetApplicationStatusess(string fromDate, string toDate,int organizationID, int? userID)
+        public List<StatusCountEntity> GetApplicationStatusess(string fromDate, string toDate, int organizationID, int? userID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -597,7 +647,7 @@ namespace Framework.Application.Services
                 return context.Fetch<StatusCountEntity>(sql);
             }
         }
-        public int PendingInFinances(string fromDate, string toDate,int organizationID, int? userID)
+        public int PendingInFinances(string fromDate, string toDate, int organizationID, int? userID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -625,7 +675,7 @@ namespace Framework.Application.Services
                 return context.Fetch<int>(sql).FirstOrDefault();
             }
         }
-        public int InReviewOfCommittees(string fromDate, string toDate,int organizationID, int? userID)
+        public int InReviewOfCommittees(string fromDate, string toDate, int organizationID, int? userID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -736,7 +786,7 @@ namespace Framework.Application.Services
                 return context.Fetch<StatisticsEntity>(sql);
             }
         }
-        public List<AssignedFieldOfficerApplicationEntity> ApplicationAssignedToFieldOfficer(int userID,int organizationID)
+        public List<AssignedFieldOfficerApplicationEntity> ApplicationAssignedToFieldOfficer(int userID, int organizationID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -781,7 +831,7 @@ namespace Framework.Application.Services
                 context.Update(myN);
             }
         }
-        public List<DashboardStatusEntity> DashboardStatuses(int userID,int organizationID)
+        public List<DashboardStatusEntity> DashboardStatuses(int userID, int organizationID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
             {
@@ -819,9 +869,9 @@ namespace Framework.Application.Services
                 return context.Fetch<DashboardStatusEntity>(sql).ToList();
             }
         }
-        public List<StatisticsEntity> GetDashboardStatistics(int organizationID,int? userID)
+        public List<StatisticsEntity> GetDashboardStatistics(int organizationID, int? userID)
         {
-            string whereClause = userID.HasValue ? string.Format("Where A.CreatedBy = {0} AND A.OrganizationID = {1}", userID.Value, organizationID) : string.Format("Where A.OrganizationID = {0}",organizationID);
+            string whereClause = userID.HasValue ? string.Format("Where A.CreatedBy = {0} AND A.OrganizationID = {1}", userID.Value, organizationID) : string.Format("Where A.OrganizationID = {0}", organizationID);
             using (var context = DataContextHelper.GetCPDataContext())
             {
                 PetaPoco.Sql sql;
@@ -1022,7 +1072,7 @@ namespace Framework.Application.Services
                 return context.Fetch<Organization>(sql).ToList();
             }
         }
-      
+
 
         public void ActiveOrganization(int OrganizationID)
         {
@@ -1064,7 +1114,7 @@ namespace Framework.Application.Services
             using (var context = DataContextHelper.GetCPDataContext())
             {
                 var data = context.Fetch<CNICVerification>("Select * From CNICVerifications Where StatusID = 11");
-                if(data != null && data.Count != 0)
+                if (data != null && data.Count != 0)
                 {
                     return true;
                 }

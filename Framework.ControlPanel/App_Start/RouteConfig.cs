@@ -50,7 +50,7 @@ namespace Framework.ControlPanel
             routes.MapRoute(
                name: "ApplicationList",  //Don't change this name it is used for Authorize Attributes
                url: "portal/application/list",
-               defaults: new { controller = "Application", action = "List" }
+               defaults: new { controller = "Application", action = "ListV1" }
            );
 
             routes.MapRoute(
@@ -67,6 +67,11 @@ namespace Framework.ControlPanel
                name: "DynamicSetupScreen",  //Don't change this name it is used for Authorize Attributes
                url: "portal/{tableName}/{screenID}/",
                defaults: new { controller = "Configuration", action = "DynamicSetupScreen", screenID = UrlParameter.Optional }
+           );
+            routes.MapRoute(
+               name: "ApplicationListData",  //Don't change this name it is used for Authorize Attributes
+               url: "portal/application/list/json",
+               defaults: new { controller = "Application", action = "ListData" }
            );
             routes.MapRoute(
                 name: "Default",

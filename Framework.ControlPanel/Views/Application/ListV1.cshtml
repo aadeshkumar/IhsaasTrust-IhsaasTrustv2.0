@@ -1,0 +1,147 @@
+﻿@using Framework.Shared.DataServices
+@using Framework.ControlPanel.Models
+@using Framework.ControlPanel.CommonCode.Helpers
+@using Framework.Shared.Enums
+@model ApplicationListModel
+@{
+    ViewBag.Title = "Manage Applications";
+}
+<style>
+
+    .paginate_button:hover {
+        font: 15px;
+        background-color: #000000;
+        color: white;
+    }
+
+    .centeredOverlay {
+        position: absolute;
+        background: white;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        color: black;
+        text-align: center;
+    }
+
+    .wrapper {
+        position: relative;
+    }
+
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        margin-left: 450px;
+        margin-top: 400px;
+    }
+
+    .dataTables_wrapper .dataTables_processing {
+        position: absolute;
+        top: 13%;
+        left: 20%;
+        width: 110%;
+        height: 100%;
+        margin-left: -20%;
+        margin-top: -25px;
+        padding-top: 20px;
+        text-align: center;
+        font-size: 3em;
+        background: silver;
+        color: black;
+        vertical-align: middle;
+        opacity: 0.5;
+    }
+</style>
+<section class="content-header">
+    <h1>
+        Manage Applications
+    </h1>
+    <ol class="breadcrumb"></ol>
+</section>
+<section class="content container-fluid">
+    @if ((Authentication.Instance.User.RoleID == (short)RolesEnum.FieldWorker || Authentication.Instance.User.RoleID == (short)RolesEnum.Admin || Authentication.Instance.User.RoleID == (short)RolesEnum.CEO))
+    {
+        <div class="row">
+            <div class="col-sm-4">
+                <a id="btnNew" href="/portal/application/create" class="btn btn-block btn-cls"><i class="icon"></i>Add New Application</a>
+            </div>
+        </div>
+    }
+    <br />
+    <div id="listDiv">
+        <div class="wrapper">
+            <div class="centeredOverlay loader" style="display:none;"></div>
+            <div class="panel panel-default">
+                <div class="panel-body table-responsive">
+                    <table id="listing_table" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>ApplicationID</th>
+                                <th>Applicant Name</th>
+                                <th>CNIC</th>
+                                <th>Contact No.</th>
+                                <th>Created By</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                @if (Model.OrganizationID != 1003)
+                                {
+                                    <th>Enterprise Facilitation</th>
+                                }
+                                else
+                                {
+                                    <th>Ibrahim Goth</th>
+                                    <th>Mehran Town</th>
+                                }
+                                <th>Reason</th>
+                                <th>Timeline</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@{
+    string columns = "[{ \"data\": \"ApplicationID\", \"orderable\":true },{ \"data\": \"ApplicantName\", \"orderable\":false },{ \"data\": \"CNIC\", \"orderable\":false },{ \"data\": \"ContactNo\", \"orderable\":false },{ \"data\": \"CreatedBy\", \"orderable\":true },{ \"data\": \"Date\", \"orderable\":true },{ \"data\": \"Status\", \"orderable\":false }," + (Model.OrganizationID != 1003 ? "{ \"data\": \"Enterprise\", \"orderable\":false }" : "{ \"data\": \"IbrahimGoth\", \"orderable\":false },{ \"data\": \"MehranTown\", \"orderable\":false }") + ",{ \"data\": \"Reason\", \"orderable\":false },{ \"data\": \"Timeline\", \"orderable\":false },{ \"data\": \"Edit\", \"orderable\":false },{ \"data\": \"Delete\", \"orderable\":false }]";
+}
+<input type="hidden" id="columns" value="@Html.Raw(columns)" />
+<script type="text/javascript">
+    var dtable;
+    var timer;
+    $(document).ready(function () {
+        dtable = $('#listing_table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": "/portal/application/list/json",
+            "columns": JSON.parse($("#columns").val()),
+            "order": [0, "desc"],
+            "language": {
+                "processing": "Loading, Please wait..."
+            }
+        });
+        var searchbox = $('[type="search"]');
+        var pgrid = $('#listing_table').DataTable();
+
+        //Remove default datatable logic tied to these events
+        searchbox.unbind();
+
+        searchbox.bind('input', function (e) {
+            if (this.value.length > 3) {
+                pgrid.search(this.value).draw();
+            }
+            if (this.value == '') {
+                pgrid.search('').draw();
+            }
+            return;
+        });
+    });
+</script>
