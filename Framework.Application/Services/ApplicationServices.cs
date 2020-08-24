@@ -225,9 +225,9 @@ namespace Framework.Application.Services
                                     ) 
                                       Select
                                       data = ISNULL((Select Count(0) Over() TotalItems, '<a href=/portal/application/create?applicationID=' + CAST(ApplicationID AS NVARCHAR(10)) + '&edit=true>' + CAST(ApplicationID AS NVARCHAR(10)) + '</a>' ApplicationID, ISNULL(ApplicantName, '') ApplicantName, ISNULL(CNIC, '') CNIC, ISNULL(ContactNo, '') ContactNo, LatLng,
-                                      (CASE WHEN Enterprise = '1' THEN '<div style=text-align:center;color:red;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) Enterprise, 
-                                      (CASE WHEN IbrahimGoth = '1' THEN '<div style=text-align:center;color:red;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) IbrahimGoth, 
-                                      (CASE WHEN MehranTown = '1' THEN '<div style=text-align:center;color:red;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) MehranTown, 
+                                      (CASE WHEN Enterprise = 'true' THEN '<div style=text-align:center;color:green;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) Enterprise, 
+                                      (CASE WHEN IbrahimGoth = 'true' THEN '<div style=text-align:center;color:green;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) IbrahimGoth, 
+                                      (CASE WHEN MehranTown = 'true' THEN '<div style=text-align:center;color:green;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) MehranTown, 
                                         [Status],
                                         StatusID,
                                         Reason, '<div style=text-align:center><a href=/Home/Template?ApplicationID=' + CAST(ApplicationID AS NVARCHAR(10)) + '><img style=width:40px;height:35px; src=../../../assets/dist/img/timeline.png /></a></div>' Timeline, CreatedBy, Date,
