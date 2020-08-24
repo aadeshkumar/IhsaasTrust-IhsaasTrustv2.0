@@ -42,7 +42,7 @@ namespace Framework.ControlPanel.Models
     }
     public class MyArray
     {
-        public int ApplicationID { get; set; }
+        public string ApplicationID { get; set; }
         public string ApplicantName { get; set; }
         public string CNIC { get; set; }
         public string ContactNo { get; set; }

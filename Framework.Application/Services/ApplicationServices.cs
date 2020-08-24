@@ -224,7 +224,7 @@ namespace Framework.Application.Services
 	                                    Where FieldID IN (28,30,32,2155,1119,2119,2120)
                                     ) 
                                       Select
-                                      data = ISNULL((Select Count(0) Over() TotalItems, ApplicationID, ISNULL(ApplicantName, '') ApplicantName, ISNULL(CNIC, '') CNIC, ISNULL(ContactNo, '') ContactNo, LatLng,
+                                      data = ISNULL((Select Count(0) Over() TotalItems, '<a href=/portal/application/create?applicationID=' + CAST(ApplicationID AS NVARCHAR(10)) + '&edit=true>' + CAST(ApplicationID AS NVARCHAR(10)) + '</a>' ApplicationID, ISNULL(ApplicantName, '') ApplicantName, ISNULL(CNIC, '') CNIC, ISNULL(ContactNo, '') ContactNo, LatLng,
                                       (CASE WHEN Enterprise = '1' THEN '<div style=text-align:center;color:red;font-weight:600;>Yes</div>' ELSE '<div style=text-align:center;color:red;font-weight:600;>No</div>' END) Enterprise, 
                                         [Status],
                                         StatusID,
