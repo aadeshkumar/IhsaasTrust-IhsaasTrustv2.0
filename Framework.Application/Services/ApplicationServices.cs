@@ -7,6 +7,8 @@ using Framework.Shared.DataServices;
 using Framework.Shared;
 using System.Reflection;
 using Framework.Shared.Enums;
+using Framework.Shared.Helpers;
+
 namespace Framework.Application.Services
 {
     public class ApplicationServices
@@ -69,11 +71,14 @@ namespace Framework.Application.Services
         }
         public int GetTotalNum(int userid)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                var ppSql = PetaPoco.Sql.Builder.Append("select count(*) from applications where  createdby = " + userid + " and applicationId not in (select RowID from approvals)");
-                return context.Fetch<int>(ppSql).FirstOrDefault();
-            }
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    var ppSql = PetaPoco.Sql.Builder.Append("select count(*) from applications where  createdby = " + userid + " and applicationId not in (select RowID from approvals)");
+                    return context.Fetch<int>(ppSql).FirstOrDefault();
+                }
+            });
         }
         public bool RejectionStatus(int ApplicationID)
         {
@@ -213,10 +218,17 @@ namespace Framework.Application.Services
 
         public string GetApplicationJson(string whereClause, int OrganizationID, int pageNo, int pageSize, int draw, string search, string orderByColumn, string orderByDirection)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                var ppSql = PetaPoco.Sql.Builder
-                        .Append(@";With FV 
+                string[] searchItems = search.Split('|');
+                string applicantName = searchItems.Length >= 1 ? searchItems[0] : string.Empty;
+                string cnic = searchItems.Length >= 2 ? searchItems[1] : string.Empty;
+                string contactNo = searchItems.Length >= 3 ? searchItems[2] : string.Empty;
+
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    var ppSql = PetaPoco.Sql.Builder
+                            .Append(@";With FV 
                                     AS
                                     (
                                         Select ApplicationID, Data, FieldID 
@@ -252,15 +264,28 @@ namespace Framework.Application.Services
                                     Inner Join Users U
                                     ON APP.CreatedBy = U.UserID " + whereClause + " Where APP.OrganizationID=@0) X", OrganizationID, draw);
 
-                if (!string.IsNullOrEmpty(search)) { ppSql = ppSql.Where(string.Format("X.ApplicantName LIKE '%{0}%' OR X.CNIC LIKE '%{0}%' OR X.ContactNo LIKE '%{0}%'", search)); }
-                //if (roleID.HasValue) { ppSql = ppSql.Where("X.UserID IN (Select UserID From UserRoles Where RoleID = @0)", roleID.Value); }
-                //if (!string.IsNullOrEmpty(enterprise) && enterprise == "true") { ppSql = ppSql.Where("X.Enterprise = @0", enterprise); }
-                //if (!string.IsNullOrEmpty(date)) { ppSql = ppSql.Where("X.Date <= @0", date); }
-                ppSql = ppSql.OrderBy(string.Format("{0} {1}", orderByColumn, orderByDirection));
-                ppSql = ppSql.Paginate(pageNo, pageSize);
-                ppSql = ppSql.Append(@"FOR JSON PATH), '[]')");
-                return context.Fetch<string>(ppSql).FirstOrDefault();
-            }
+                    //if (!string.IsNullOrEmpty(search)) { ppSql = ppSql.Where(string.Format("X.ApplicantName LIKE '%{0}%' OR X.CNIC LIKE '%{0}%' OR X.ContactNo LIKE '%{0}%'", search)); }
+                    if (!string.IsNullOrEmpty(applicantName))
+                    {
+                        ppSql = ppSql.Where(string.Format("X.ApplicantName LIKE '%{0}%'", applicantName));
+                    }
+                    if (!string.IsNullOrEmpty(cnic))
+                    {
+                        ppSql = ppSql.Where(string.Format("X.CNIC LIKE '%{0}%'", cnic));
+                    }
+                    if (!string.IsNullOrEmpty(contactNo))
+                    {
+                        ppSql = ppSql.Where(string.Format("X.ContactNo LIKE '%{0}%'", contactNo));
+                    }
+                    //if (roleID.HasValue) { ppSql = ppSql.Where("X.UserID IN (Select UserID From UserRoles Where RoleID = @0)", roleID.Value); }
+                    //if (!string.IsNullOrEmpty(enterprise) && enterprise == "true") { ppSql = ppSql.Where("X.Enterprise = @0", enterprise); }
+                    //if (!string.IsNullOrEmpty(date)) { ppSql = ppSql.Where("X.Date <= @0", date); }
+                    ppSql = ppSql.OrderBy(string.Format("{0} {1}", orderByColumn, orderByDirection));
+                    ppSql = ppSql.Paginate(pageNo, pageSize);
+                    ppSql = ppSql.Append(@"FOR JSON PATH), '[]')");
+                    return context.Fetch<string>(ppSql).FirstOrDefault();
+                }
+            });
         }
         public List<ApplicationListEntity> GetApplications(string applicantName, string cnic, string contactNo, string whereClause, short? statusID, short? roleID, string enterprise, string date, int OrganizationID)
         {
@@ -477,12 +502,14 @@ namespace Framework.Application.Services
         //?
         public int GetNoOfApplicationss(short roleID, int userID, int organizationID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                PetaPoco.Sql sql;
-                if (roleID != (short)RolesEnum.Admin)
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    sql = PetaPoco.Sql.Builder.Append(@"Select Count(*)                                                From Approvals A
+                    PetaPoco.Sql sql;
+                    if (roleID != (short)RolesEnum.Admin)
+                    {
+                        sql = PetaPoco.Sql.Builder.Append(@"Select Count(*)                                                From Approvals A
                                                         Inner Join ApprovalHierarchies AH
                                                         ON A.UserID = AH.UserID
                                                         Inner Join Roles R
@@ -494,26 +521,29 @@ namespace Framework.Application.Services
                                                         Inner Join Users U
                                                         ON U.UserID = A.UserID
                                                         Where UR.UserID = @0 AND A.RowID NOT IN (Select RowID From Approvals Where UserID = @0) AND A.StatusID NOT IN (7,9,10)", userID);
-                }
-                else
-                {
-                    sql = PetaPoco.Sql.Builder.Append("Select count(*) from Applications");
+                    }
+                    else
+                    {
+                        sql = PetaPoco.Sql.Builder.Append("Select count(*) from Applications");
 
+                    }
+                    return context.Fetch<int>("select count(*) from Applications Where OrganizationID=@0", organizationID).FirstOrDefault();
                 }
-                return context.Fetch<int>("select count(*) from Applications Where OrganizationID=@0", organizationID).FirstOrDefault();
-            }
+            });
         }
         public List<ApplicationStatusesEntity> GetApplicationStatuses(short roleID, int userID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                string whereClause = string.Empty;
-                if (roleID != (short)RolesEnum.Admin)
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    whereClause = string.Format("AND A.CreatedBy = {0}", userID);
+                    string whereClause = string.Empty;
+                    if (roleID != (short)RolesEnum.Admin)
+                    {
+                        whereClause = string.Format("AND A.CreatedBy = {0}", userID);
 
-                }
-                var sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfRecords, X.StatusID, S.StatusName From (
+                    }
+                    var sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfRecords, X.StatusID, S.StatusName From (
                                                         Select A.StatusID,
                                                         ROW_NUMBER() OVER(Partition By A.RowID Order By A.CreatedOn Desc) RankNo
                                                         From Approvals A
@@ -522,8 +552,9 @@ namespace Framework.Application.Services
                                                         Inner Join Statuses S ON S.StatusID = X.StatusID
                                                         Where X.RankNo = 1
                                                         Group By X.StatusID, S.StatusName");
-                return context.Fetch<ApplicationStatusesEntity>(sql);
-            }
+                    return context.Fetch<ApplicationStatusesEntity>(sql);
+                }
+            });
         }
         public Notification GetNotification(int NotificationID)
         {
@@ -535,9 +566,11 @@ namespace Framework.Application.Services
         public List<ApprovalListEntity> GetApprovalApplications(int userID, int organizationID, bool isEscalated = false)
         {
             string whereClause = isEscalated ? "A.IsEscalated=1" : "UR.UserID = @0";
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                var sql = PetaPoco.Sql.Builder.Append(@"Select 
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    var sql = PetaPoco.Sql.Builder.Append(@"Select 
 	                                                        A.ApprovalID, 
 	                                                        A.RowID ApplicationID, 
                                                             (Select [Data] From FieldValues Where FieldID = 28 AND ApplicationID = A.RowID) ApplicantName,
@@ -565,8 +598,9 @@ namespace Framework.Application.Services
                                                         Inner Join Applications APP
 														On APP.ApplicationID = A.RowID
                                                         Where " + whereClause + " AND A.IsDeleted IS NULL AND A.RowID NOT IN (Select RowID From Approvals Where UserID = @0 and IsDeleted  IS NULL) AND A.StatusID NOT IN (7,9,10) AND APP.OrganizationID=@1", userID, organizationID);
-                return context.Fetch<ApprovalListEntity>(sql);
-            }
+                    return context.Fetch<ApprovalListEntity>(sql);
+                }
+            });
         }
         public List<Status> GetStatuses()
         {
@@ -587,56 +621,64 @@ namespace Framework.Application.Services
 
         public int GetNoOfApplicationss(string fromDate, string toDate, int organizationID, int? userID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder.Select(@"Count(0) NoOfApplications").From("Applications");
-                if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    sql = sql.Where("CONVERT(date, CreatedON) BETWEEN @0 AND @1", fromDate, toDate);
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder.Select(@"Count(0) NoOfApplications").From("Applications");
+                    if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                    {
+                        sql = sql.Where("CONVERT(date, CreatedON) BETWEEN @0 AND @1", fromDate, toDate);
+                    }
+                    if (userID.HasValue && userID.Value != 0)
+                    {
+                        sql = sql.Where("CreatedBy = @0", userID.Value);
+                    }
+                    sql = sql.Where("OrganizationID = @0", organizationID);
+                    return context.Fetch<int>(sql).FirstOrDefault();
                 }
-                if (userID.HasValue && userID.Value != 0)
-                {
-                    sql = sql.Where("CreatedBy = @0", userID.Value);
-                }
-                sql = sql.Where("OrganizationID = @0", organizationID);
-                return context.Fetch<int>(sql).FirstOrDefault();
-            }
+            });
         }
         public List<NoOfApplicationsByUsersEntity> GetNoOfApplicationsByUserss(string fromDate, string toDate, int organizationID, int? userID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder.Select(@"Count(0) NoOfApplications, U.FullName, A.CreatedBy").From("Applications A")
-                    .InnerJoin("Users U").On("U.UserID = A.CreatedBy").Where("A.OrganizationID=@0", organizationID);
-                if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    sql = sql.Where("CONVERT(date, A.CreatedON) BETWEEN @0 AND @1", fromDate, toDate);
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder.Select(@"Count(0) NoOfApplications, U.FullName, A.CreatedBy").From("Applications A")
+                        .InnerJoin("Users U").On("U.UserID = A.CreatedBy").Where("A.OrganizationID=@0", organizationID);
+                    if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                    {
+                        sql = sql.Where("CONVERT(date, A.CreatedON) BETWEEN @0 AND @1", fromDate, toDate);
+                    }
+                    if (userID.HasValue && userID.Value != 0)
+                    {
+                        sql = sql.Where("A.CreatedBy = @0", userID.Value);
+                    }
+                    sql = sql.GroupBy("U.FullName, A.CreatedBy");
+                    return context.Fetch<NoOfApplicationsByUsersEntity>(sql);
                 }
-                if (userID.HasValue && userID.Value != 0)
-                {
-                    sql = sql.Where("A.CreatedBy = @0", userID.Value);
-                }
-                sql = sql.GroupBy("U.FullName, A.CreatedBy");
-                return context.Fetch<NoOfApplicationsByUsersEntity>(sql);
-            }
+            });
         }
         public List<StatusCountEntity> GetApplicationStatusess(string fromDate, string toDate, int organizationID, int? userID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                string whereClause = string.Empty;
-                if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    whereClause = string.Format("and CONVERT(date, AP.CreatedON) BETWEEN '{0}' AND '{1}'", fromDate, toDate);
-                }
-                if (userID.HasValue && userID.Value != 0)
-                {
-                    whereClause += string.Format("and AP.CreatedBy = {0}", userID.Value);
-                }
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder.Append(@";With CTE AS (
+                    string whereClause = string.Empty;
+                    if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                    {
+                        whereClause = string.Format("and CONVERT(date, AP.CreatedON) BETWEEN '{0}' AND '{1}'", fromDate, toDate);
+                    }
+                    if (userID.HasValue && userID.Value != 0)
+                    {
+                        whereClause += string.Format("and AP.CreatedBy = {0}", userID.Value);
+                    }
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder.Append(@";With CTE AS (
                                                     Select Row_Number() Over(Partition By A.RowID Order By A.CreatedOn Desc) RankNo, 
                                                     S.StatusName
                                                     From Approvals A
@@ -646,24 +688,27 @@ namespace Framework.Application.Services
                                                     " + whereClause + @"
                                                   )
                                                   Select Count(0) StatusCount, StatusName From CTE Where RankNo = 1 Group By StatusName", organizationID);
-                return context.Fetch<StatusCountEntity>(sql);
-            }
+                    return context.Fetch<StatusCountEntity>(sql);
+                }
+            });
         }
         public int PendingInFinances(string fromDate, string toDate, int organizationID, int? userID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                string whereClause = string.Format("AP.OrganizationID = {0} AND", organizationID);
-                if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    whereClause = string.Format("CONVERT(date, AP.CreatedON) BETWEEN '{0}' AND '{1}' AND", fromDate, toDate);
-                }
-                if (userID.HasValue && userID.Value != 0)
-                {
-                    whereClause += string.Format("AP.CreatedBy = {0} AND", userID.Value);
-                }
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) PendingInFinance From Approvals A Inner Join Applications AP ON A.RowID =
+                    string whereClause = string.Format("AP.OrganizationID = {0} AND", organizationID);
+                    if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                    {
+                        whereClause = string.Format("CONVERT(date, AP.CreatedON) BETWEEN '{0}' AND '{1}' AND", fromDate, toDate);
+                    }
+                    if (userID.HasValue && userID.Value != 0)
+                    {
+                        whereClause += string.Format("AP.CreatedBy = {0} AND", userID.Value);
+                    }
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) PendingInFinance From Approvals A Inner Join Applications AP ON A.RowID =
                                                         AP.ApplicationID Where " + whereClause + @"  A.UserID IN (
                                                         Select UserID From ApprovalHierarchies 
                                                         Where ReportedTo IN (
@@ -674,24 +719,27 @@ namespace Framework.Application.Services
                                                         ON UR.RoleID = R.RoleID
                                                         Where UR.RoleID = @0)) AND StatusID = 8 AND RowID NOT IN (Select RowID From Approvals Where                  
                                                         UserID IN (Select UserID From UserRoles Where RoleID = @0))", (short)RolesEnum.Finance);
-                return context.Fetch<int>(sql).FirstOrDefault();
-            }
+                    return context.Fetch<int>(sql).FirstOrDefault();
+                }
+            });
         }
         public int InReviewOfCommittees(string fromDate, string toDate, int organizationID, int? userID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                string whereClause = string.Format("AP.OrganizationID = {0} AND", organizationID);
-                if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    whereClause = string.Format("CONVERT(date, AP.CreatedON) BETWEEN '{0}' AND '{1}' AND", fromDate, toDate);
-                }
-                if (userID.HasValue && userID.Value != 0)
-                {
-                    whereClause += string.Format("AP.CreatedBy = {0} AND", userID.Value);
-                }
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) From Approvals A Inner Join Applications AP ON A.RowID = AP.ApplicationID
+                    string whereClause = string.Format("AP.OrganizationID = {0} AND", organizationID);
+                    if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                    {
+                        whereClause = string.Format("CONVERT(date, AP.CreatedON) BETWEEN '{0}' AND '{1}' AND", fromDate, toDate);
+                    }
+                    if (userID.HasValue && userID.Value != 0)
+                    {
+                        whereClause += string.Format("AP.CreatedBy = {0} AND", userID.Value);
+                    }
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) From Approvals A Inner Join Applications AP ON A.RowID = AP.ApplicationID
                                                     Where " + whereClause + @" A.UserID IN (
                                                     Select UserID From ApprovalHierarchies 
                                                     Where ReportedTo IN (
@@ -701,47 +749,53 @@ namespace Framework.Application.Services
                                                     Inner Join Roles R
                                                     ON UR.RoleID = R.RoleID
                                                 Where UR.RoleID = @0)) AND StatusID IN (8,4) AND RowID NOT IN (Select RowID From Approvals Where UserID IN (Select UserID From UserRoles Where RoleID = @0))", (short)RolesEnum.Committee);
-                return context.Fetch<int>(sql).FirstOrDefault();
-            }
+                    return context.Fetch<int>(sql).FirstOrDefault();
+                }
+            });
         }
         public List<NoOfStreamEntity> GetNoOfStream(string fromDate, string toDate, int? userID, int organizationID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                string whereClause = string.Empty;
-                if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                using (var context = DataContextHelper.GetCPDataContext())
                 {
-                    whereClause = string.Format("CONVERT(date, Fv.CreatedON) BETWEEN '{0}' AND '{1}' AND", fromDate, toDate);
-                }
-                if (userID.HasValue && userID.Value != 0)
-                {
-                    whereClause += string.Format("AP.CreatedBy = {0} AND", userID.Value);
-                }
-                PetaPoco.Sql sql;
-                if (organizationID != 1003)
-                {
-                    sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfStream, FV.FieldID, F.FieldName
+                    string whereClause = string.Empty;
+                    if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+                    {
+                        whereClause = string.Format("CONVERT(date, Fv.CreatedON) BETWEEN '{0}' AND '{1}' AND", fromDate, toDate);
+                    }
+                    if (userID.HasValue && userID.Value != 0)
+                    {
+                        whereClause += string.Format("AP.CreatedBy = {0} AND", userID.Value);
+                    }
+                    PetaPoco.Sql sql;
+                    if (organizationID != 1003)
+                    {
+                        sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfStream, FV.FieldID, F.FieldName
                                                     From FieldValues FV Inner Join Fields F ON F.FieldID = FV.FieldID
                                                     Where FV.FieldID IN (101,95,96,96,97) AND (FV.[Data] = 'true' OR FV.[Data] != '')
                                                     Group By FV.FieldID, F.FieldName");
-                }
-                else
-                {
-                    sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfStream, FV.FieldID, F.FieldName
+                    }
+                    else
+                    {
+                        sql = PetaPoco.Sql.Builder.Append(@"Select Count(0) NoOfStream, FV.FieldID, F.FieldName
                                                     From FieldValues FV Inner Join Fields F ON F.FieldID = FV.FieldID
                                                     Where FV.FieldID IN (2119,2120) AND (FV.[Data] = 'true' OR FV.[Data] != '' AND F.OrganizationID = @0)
                                                     Group By FV.FieldID, F.FieldName", organizationID);
+                    }
+                    return context.Fetch<NoOfStreamEntity>(sql);
                 }
-                return context.Fetch<NoOfStreamEntity>(sql);
-            }
+            });
         }
 
         public List<StatisticsEntity> GetNoOfDelayedCasess(int organizationID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                var sql = PetaPoco.Sql.Builder
-                    .Append(@"Select Count(0) CountNo, 'Delayed by Committee' ColumnName
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    var sql = PetaPoco.Sql.Builder
+                        .Append(@"Select Count(0) CountNo, 'Delayed by Committee' ColumnName
                                 From Applications A
                                 Inner Join Approvals AP
                                 On A.ApplicationID = AP.RowID
@@ -773,27 +827,33 @@ namespace Framework.Application.Services
                                 AP.UserID IN (Select UserID From UserRoles Where RoleID = 4)
                                 AND AP.IsDeleted IS NULL AND AP.StatusID = 8
                                 AND AP.RowID NOT IN (Select RowID From Approvals Where OrganizationID IN (Select UserID From UserRoles Where RoleID = 7) AND StatusID = 9)", organizationID);
-                return context.Fetch<StatisticsEntity>(sql);
-            }
+                    return context.Fetch<StatisticsEntity>(sql);
+                }
+            });
         }
         public List<StatisticsEntity> GetTotalAndConcludedApplicationss(int organizationID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                var sql = PetaPoco.Sql.Builder
-                    .Append(@"Select Count(0) CountNo, 'Total No. of Applications' ColumnName From Applications Where OrganizationID=@0
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    var sql = PetaPoco.Sql.Builder
+                        .Append(@"Select Count(0) CountNo, 'Total No. of Applications' ColumnName From Applications Where OrganizationID=@0
                                 Union All
                                 Select Count(0) CountNo, 'Concluded Applications' ColumnName From Approvals A Inner Join Applications APP On A.RowID = APP.ApplicationID
                                 Where StatusID = 9 AND APP.OrganizationID=@0", organizationID);
-                return context.Fetch<StatisticsEntity>(sql);
-            }
+                    return context.Fetch<StatisticsEntity>(sql);
+                }
+            });
         }
         public List<AssignedFieldOfficerApplicationEntity> ApplicationAssignedToFieldOfficer(int userID, int organizationID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder.Append(@"Select 
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder.Append(@"Select 
 	                                                A.ApplicationID,
                                                     (Select [Data] From FieldValues Where FieldID = 28 AND ApplicationID = A.ApplicationID) ApplicantName,
 	                                                (Select [Data] From FieldValues Where FieldID = 30 AND ApplicationID = A.ApplicationID) CNIC,
@@ -803,8 +863,9 @@ namespace Framework.Application.Services
                                                 From Applications A 
                                                 Inner Join Users U ON A.AdminID = U.UserID
                                                 Where A.CreatedBy = @0 AND A.AdminID IS NOT NULL AND A.ApplicationID NOT IN (Select RowID From Approvals) AND A.OrganizationID=@1", userID, organizationID);
-                return context.Fetch<AssignedFieldOfficerApplicationEntity>(sql);
-            }
+                    return context.Fetch<AssignedFieldOfficerApplicationEntity>(sql);
+                }
+            });
         }
         public void InsertNotification(Notification n)
         {
@@ -835,11 +896,13 @@ namespace Framework.Application.Services
         }
         public List<DashboardStatusEntity> DashboardStatuses(int userID, int organizationID)
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder
-                    .Append(@"Select *, 
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder
+                        .Append(@"Select *, 
 	                        (CASE 
 		                          WHEN Y.RoleName = 'Committee' AND StatusName = 'Approved' THEN 'Pending in RS'
 		                          WHEN Y.RoleName = 'RS' AND StatusName = 'Approved' THEN 'Pending in Finance'
@@ -868,17 +931,20 @@ namespace Framework.Application.Services
 	                        On X.RoleID = R.RoleID
 	                        Group By S.StatusName, R.RoleName) 
                         Y", userID, organizationID);
-                return context.Fetch<DashboardStatusEntity>(sql).ToList();
-            }
+                    return context.Fetch<DashboardStatusEntity>(sql).ToList();
+                }
+            });
         }
         public List<StatisticsEntity> GetDashboardStatistics(int organizationID, int? userID)
         {
             string whereClause = userID.HasValue ? string.Format("Where A.CreatedBy = {0} AND A.OrganizationID = {1}", userID.Value, organizationID) : string.Format("Where A.OrganizationID = {0}", organizationID);
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                PetaPoco.Sql sql;
-                sql = PetaPoco.Sql.Builder
-                    .Append(@"  Select Count(0) CountNo, 'No. of Applications' ColumnName From Applications A " + whereClause + @"
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    PetaPoco.Sql sql;
+                    sql = PetaPoco.Sql.Builder
+                        .Append(@"  Select Count(0) CountNo, 'No. of Applications' ColumnName From Applications A " + whereClause + @"
                                 Union All
                                 Select Count(0) CountNo, X.StatusName ColumnName From (
                                 Select ROW_NUMBER() OVER(Partition By AP.RowID Order By AP.CreatedOn Desc) RankNo, AP.StatusID, S.StatusName From Applications A Inner Join Approvals AP On A.ApplicationID = AP.RowID Inner Join Statuses S On S.StatusID = AP.StatusID " + whereClause + @") X Where X.RankNo = 1 Group By X.StatusName
@@ -892,8 +958,9 @@ namespace Framework.Application.Services
 								END) ColumnName From (
                                 Select ROW_NUMBER() OVER(Partition By AP.RowID Order By AP.CreatedOn Desc) RankNo, AP.UserID, R.RoleName, S.StatusName From Applications A Inner Join Approvals AP On A.ApplicationID = AP.RowID Inner Join UserRoles UR On UR.UserID = AP.UserID Inner Join Roles R On R.RoleID = UR.RoleID
                                   Inner Join Statuses S On S.StatusID = AP.StatusID  " + whereClause + ") X Where X.RankNo = 1 Group By X.RoleName, X.StatusName");
-                return context.Fetch<StatisticsEntity>(sql).ToList();
-            }
+                    return context.Fetch<StatisticsEntity>(sql).ToList();
+                }
+            });
         }
 
         public int GetNoOfApplications(string fromDate, string toDate, int? userID)
@@ -1068,11 +1135,14 @@ namespace Framework.Application.Services
 
         public List<Organization> GetActiveOrganizations()
         {
-            using (var context = DataContextHelper.GetCPDataContext())
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
             {
-                var sql = PetaPoco.Sql.Builder.Append("Select * from Organizations where IsActive = 'true'");
-                return context.Fetch<Organization>(sql).ToList();
-            }
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    var sql = PetaPoco.Sql.Builder.Append("Select * from Organizations where IsActive = 'true'");
+                    return context.Fetch<Organization>(sql).ToList();
+                }
+            });
         }
 
 

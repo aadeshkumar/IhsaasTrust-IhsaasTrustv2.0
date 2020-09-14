@@ -527,7 +527,7 @@ namespace Framework.ControlPanel.Controllers
 
             order[0].TryGetValue("dir", out orderByDirection);
 
-            var jsonResult = ApplicationServices.Instance.GetApplicationJson(whereClause, organizationID, start, length, draw, searchText, orderByColumn, orderByDirection);
+            var jsonResult = GetApplicationJson(whereClause, organizationID, start, length, draw, searchText, orderByColumn, orderByDirection);
             JavaScriptSerializer j = new JavaScriptSerializer();
             object jsonData = j.Deserialize(jsonResult, typeof(object));
 
@@ -537,6 +537,11 @@ namespace Framework.ControlPanel.Controllers
             result.JsonRequestBehavior = JsonRequestBehavior.AllowGet;
             result.Data = new { draw = draw, recordsTotal = root.Length != 0 ? root[0].TotalItems : 0, recordsFiltered = root.Length != 0 ? root[0].TotalItems : 0, data = jsonData  };
             return result;
+        }
+        public string GetApplicationJson(string whereClause, int OrganizationID, int start, int length, int draw, string search, string orderByColumn, string orderByDirection)
+        {
+            var jsonResult = ApplicationServices.Instance.GetApplicationJson(whereClause, OrganizationID, start, length, draw, search, orderByColumn, orderByDirection);
+            return jsonResult;
         }
 
         public ActionResult RationList(string applicantName, string cnic, string contactNo, string enterprise, string Ration, string date, short? statusID, short? searchRoleID)

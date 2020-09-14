@@ -82,9 +82,9 @@
                         <thead>
                             <tr>
                                 <th>ApplicationID</th>
-                                <th>Applicant Name</th>
-                                <th>CNIC</th>
-                                <th>Contact No.</th>
+                                <th id="applicant_name">Applicant Name</th>
+                                <th id="cnic">CNIC</th>
+                                <th id="contact_no">Contact No.</th>
                                 <th>Created By</th>
                                 <th>Date</th>
                                 <th>Status</th>
@@ -128,6 +128,7 @@
                 "processing": "Loading, Please wait..."
             }
         });
+        $('#listing_table_filter').hide();
         var searchbox = $('[type="search"]');
         var pgrid = $('#listing_table').DataTable();
 
@@ -142,6 +143,43 @@
                 pgrid.search('').draw();
             }
             return;
+        });
+
+
+
+        $('#listing_table thead th').each(function (i, v) {
+            if (i == 1 || i == 2 || i == 3) {
+                var title = $(this).text();
+                var id = $(this).attr("id");
+                $(this).append('<input relf-id="' + id + '" search="enable" type="text" placeholder="Search ' + title + '" />');
+            }
+        });
+        // Apply the search
+        var applicant_name = "";
+        var cnic = "";
+        var contact_no = "";
+
+        $('[search="enable"]').each(function () {
+            var input = $(this);
+            var id = $(input).attr("relf-id");
+            input.unbind();
+            input.bind('input', function (e) {
+                if (this.value.length > 3) {
+                    if (id == "applicant_name") { applicant_name = this.value; }
+                    if (id == "cnic") { cnic = this.value; }
+                    if (id == "contact_no") { contact_no = this.value; }
+                    var search = applicant_name + "|" + cnic + "|" + contact_no;
+                    pgrid.search(search).draw();
+                }
+                if (this.value == '') {
+                    if (id == "applicant_name") { applicant_name = this.value; }
+                    if (id == "cnic") { cnic = this.value; }
+                    if (id == "contact_no") { contact_no = this.value; }
+                    var search = applicant_name + "|" + cnic + "|" + contact_no;
+                    pgrid.search(search).draw();
+                }
+                return;
+            });
         });
     });
 </script>
