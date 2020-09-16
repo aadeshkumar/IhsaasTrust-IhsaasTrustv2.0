@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Pivot";
+    Layout = "~/Views/Shared/_Layout_Blank.cshtml";
+}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-basic-latest.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.13.0/pivot.min.css">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.22.0/pivot.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.22.0/plotly_renderers.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.6.0/tips_data.min.js"></script>
+<div style="width:80%;height:100%;margin-left:20px !Important;margin-right:20px !Important;">
+    <div>
+        <div style="float:left;margin-top:25px;">
+            <input type="button" value="&larr;" onclick="history.back()">
+        </div>
+        <div style="float:left;margin-left:20px;">
+            <h2>Data Analysis Tool</h2>
+        </div>
+    </div>
+    <div id="output"></div>
+</div>
+<script>
+    $(function(){
+        var derivers = $.pivotUtilities.derivers;
+        var renderers = $.extend($.pivotUtilities.renderers,
+            $.pivotUtilities.plotly_renderers);
+        $.getJSON("/portal/application/pivot/data/json", function(data) {
+            $("#output").pivotUI(data, {
+                renderers: renderers,
+                cols: ["Date"], rows: ["Status"],
+                rendererName: "Bar Chart",
+                rowOrder: "value_a_to_z", colOrder: "value_z_to_a",
+            });
+        });
+     });
+</script>

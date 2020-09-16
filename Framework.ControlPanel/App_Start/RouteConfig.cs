@@ -74,6 +74,16 @@ namespace Framework.ControlPanel
                defaults: new { controller = "Application", action = "ListData" }
            );
             routes.MapRoute(
+              name: "PivotData",  //Don't change this name it is used for Authorize Attributes
+              url: "portal/application/pivot/data/json",
+              defaults: new { controller = "Application", action = "PivotData" }
+          );
+            routes.MapRoute(
+              name: "Pivot",  //Don't change this name it is used for Authorize Attributes
+              url: "portal/application/pivot/data/analysis",
+              defaults: new { controller = "Application", action = "Pivot" }
+          );
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }

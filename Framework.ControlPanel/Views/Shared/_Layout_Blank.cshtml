@@ -1,0 +1,29 @@
+﻿@using Framework.ControlPanel.CommonCode.Helpers
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <!-- external libs from cdnjs -->
+    <script src="https://cdn.plot.ly/plotly-basic-latest.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <!-- PivotTable.js libs from ../dist -->
+    <link href="/assets/dist/css/pivot.css" rel="stylesheet" />
+    <script src="/Scripts/pivot.js"></script>
+    <script src="/Scripts/plotly_renderers.js"></script>
+    <style>
+        body {
+            font-family: Verdana;
+        }
+    </style>
+
+    <!-- optional: mobile support with jqueryui-touch-punch -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+</head>
+<body style="margin:0px; padding:0px;">
+      @RenderBody()
+</body>
+</html>

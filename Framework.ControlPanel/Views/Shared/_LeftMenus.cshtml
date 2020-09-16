@@ -89,6 +89,10 @@
                 {
                     <li><a href="/portal/application/create"><i class="fa fa-pencil-square-o"></i> Create</a></li>
                 }
+                @if ((Authentication.Instance.User.RoleID == (short)RolesEnum.SuperAdmin || Authentication.Instance.User.RoleID == (short)RolesEnum.Admin || Authentication.Instance.User.RoleID == (short)RolesEnum.CEO || Authentication.Instance.User.RoleID == (short)RolesEnum.Finance))
+                {
+                    <li><a href="/portal/application/pivot/data/analysis"><i class="fa fa-pencil-square-o"></i> Data Analytics Tools</a></li>
+                }
 
                 <li><a href="/portal/application/list/"><i class="fa fa-list"></i>List</a></li>
                 <li><a href="/portal/ration-amount/24/"><i class="fa fa-pencil-square-o"></i> Ration Amount</a></li>
@@ -96,7 +100,7 @@
                 {
                     <li><a href="/portal/application/Rationlist/"><i class="fa fa-list"></i>Ration List Applications</a></li>
                 }
-                </ul>
+            </ul>
         </li>
 
         <li class="treeview">

@@ -762,6 +762,19 @@ namespace Framework.ControlPanel.Controllers
                             </html>";
             return html;
         }
+
         #endregion
+        public ActionResult Pivot()
+        {
+            return View();
+        }
+        public JsonResult PivotData()
+        {
+            int organizationID = Authentication.Instance.User.OrganizationID;
+            var data = ApplicationServices.Instance.GetApplicationForPivotJson(organizationID);
+            JavaScriptSerializer j = new JavaScriptSerializer();
+            object jsonData = j.Deserialize(data, typeof(object));
+            return Json(jsonData, JsonRequestBehavior.AllowGet);
+        }
     }
 }

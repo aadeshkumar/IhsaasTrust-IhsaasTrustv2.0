@@ -6402,6 +6402,7 @@
     <Content Include="assets\dist\css\alt\AdminLTE-without-plugins.css" />
     <Content Include="assets\dist\css\alt\AdminLTE-without-plugins.min.css" />
     <Content Include="assets\dist\css\custom.css" />
+    <Content Include="assets\dist\css\pivot.css" />
     <Content Include="assets\dist\css\skins\skin-black-light.css" />
     <Content Include="assets\dist\css\skins\skin-black-light.min.css" />
     <Content Include="assets\dist\css\skins\skin-black.css" />
@@ -14439,10 +14440,12 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\pivot.js" />
     <Content Include="Scripts\knockout-2.1.0.debug.js" />
     <Content Include="Scripts\knockout-2.1.0.js" />
     <Content Include="Scripts\modernizr-2.5.3.js" />
     <Content Include="Scripts\nprogress.js" />
+    <Content Include="Scripts\plotly_renderers.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Views\Dynamic\Index.cshtml" />
     <Content Include="Views\Dynamic\_AddEditTableRecord.cshtml" />
@@ -14493,6 +14496,8 @@
     <Content Include="Views\Application\RationList.cshtml" />
     <Content Include="Views\Application\_RationList.cshtml" />
     <Content Include="Views\Application\ListV1.cshtml" />
+    <Content Include="Views\Application\Pivot.cshtml" />
+    <Content Include="Views\Shared\_Layout_Blank.cshtml" />
     <None Include="Web.Release_Prod.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

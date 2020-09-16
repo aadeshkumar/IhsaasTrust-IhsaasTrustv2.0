@@ -287,6 +287,33 @@ namespace Framework.Application.Services
                 }
             });
         }
+
+        public string GetApplicationForPivotJson(int OrganizationID)
+        {
+            return ServiceExecutionHelper.Instance.GetDataAsync(() =>
+            {
+                using (var context = DataContextHelper.GetCPDataContext())
+                {
+                    var ppSql = PetaPoco.Sql.Builder
+                            .Append(@";With FV 
+                                    AS
+                                    (
+                                        Select ApplicationID, Data, FieldID 
+	                                    From FieldValues 
+	                                    Where FieldID IN (28,30,32,2155,1119,2119,2120)
+                                    ) 
+                                      Select
+                                      data = ISNULL((Select ApplicationID, ISNULL(ApplicantName, '') ApplicantName, ISNULL(CNIC, '') CNIC, ISNULL(ContactNo, '') ContactNo, LatLng, Enterprise, IbrahimGoth, MehranTown, [Status], Reason, CreatedBy, Date
+					                    From (Select APP.ApplicationID, (Select [Data] From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 28) ApplicantName, (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 30) CNIC, (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 32) ContactNo, (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2155) Latlng, (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 1119) Enterprise, (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2119) IbrahimGoth, (Select [Data] ApplicantName From FV Where FV.ApplicationID = APP.ApplicationID AND FV.FieldID = 2120) MehranTown, (Select Top 1 S.StatusName + ' (' + (Select Top 1 FullName From Users Where UserID = A.UserID) + ')' From Approvals A Inner Join Statuses S ON A.StatusID = S.StatusID Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) [Status], (Select Top 1 S.StatusID From Approvals A Inner Join Statuses S ON A.StatusID = S.StatusID Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) [StatusID],ISNULL((Select Top 1 A.Reason From Approvals A Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc), '-') Reason, (Select Top 1 A.UserID From Approvals A Where A.RowID = APP.ApplicationID Order By A.CreatedOn Desc) UserID, U.FullName CreatedBy, CAST(APP.Date AS DATE) [Date]
+                                    From Applications APP
+                                    Inner Join Users U
+                                    ON APP.CreatedBy = U.UserID 
+                                    Where APP.OrganizationID=@0) X", OrganizationID);
+                    ppSql = ppSql.Append(@"FOR JSON PATH), '[]')");
+                    return context.Fetch<string>(ppSql).FirstOrDefault();
+                }
+            });
+        }
         public List<ApplicationListEntity> GetApplications(string applicantName, string cnic, string contactNo, string whereClause, short? statusID, short? roleID, string enterprise, string date, int OrganizationID)
         {
             using (var context = DataContextHelper.GetCPDataContext())
