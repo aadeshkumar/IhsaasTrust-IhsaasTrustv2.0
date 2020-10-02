@@ -81,7 +81,7 @@
                     <table id="listing_table" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>ApplicationID</th>
+                                <th id="application_id">ApplicationID</th>
                                 <th id="applicant_name">Applicant Name</th>
                                 <th id="cnic">CNIC</th>
                                 <th id="contact_no">Contact No.</th>
@@ -111,7 +111,7 @@
     </div>
 </section>
 @{
-    string columns = "[{ \"data\": \"ApplicationID\", \"orderable\":true },{ \"data\": \"ApplicantName\", \"orderable\":false },{ \"data\": \"CNIC\", \"orderable\":false },{ \"data\": \"ContactNo\", \"orderable\":false },{ \"data\": \"CreatedBy\", \"orderable\":true },{ \"data\": \"Date\", \"orderable\":true },{ \"data\": \"Status\", \"orderable\":false }," + (Model.OrganizationID != 1003 ? "{ \"data\": \"Enterprise\", \"orderable\":false }" : "{ \"data\": \"IbrahimGoth\", \"orderable\":false },{ \"data\": \"MehranTown\", \"orderable\":false }") + ",{ \"data\": \"Reason\", \"orderable\":false },{ \"data\": \"Timeline\", \"orderable\":false },{ \"data\": \"Edit\", \"orderable\":false },{ \"data\": \"Delete\", \"orderable\":false }]";
+    string columns = "[{ \"data\": \"ApplicationID\", \"orderable\":false },{ \"data\": \"ApplicantName\", \"orderable\":false },{ \"data\": \"CNIC\", \"orderable\":false },{ \"data\": \"ContactNo\", \"orderable\":false },{ \"data\": \"CreatedBy\", \"orderable\":true },{ \"data\": \"Date\", \"orderable\":true },{ \"data\": \"Status\", \"orderable\":false }," + (Model.OrganizationID != 1003 ? "{ \"data\": \"Enterprise\", \"orderable\":false }" : "{ \"data\": \"IbrahimGoth\", \"orderable\":false },{ \"data\": \"MehranTown\", \"orderable\":false }") + ",{ \"data\": \"Reason\", \"orderable\":false },{ \"data\": \"Timeline\", \"orderable\":false },{ \"data\": \"Edit\", \"orderable\":false },{ \"data\": \"Delete\", \"orderable\":false }]";
 }
 <input type="hidden" id="columns" value="@Html.Raw(columns)" />
 <script type="text/javascript">
@@ -148,7 +148,7 @@
 
 
         $('#listing_table thead th').each(function (i, v) {
-            if (i == 1 || i == 2 || i == 3) {
+            if (i == 0 || i == 1 || i == 2 || i == 3) {
                 var title = $(this).text();
                 var id = $(this).attr("id");
                 $(this).append('<input relf-id="' + id + '" search="enable" type="text" placeholder="Search ' + title + '" />');
@@ -158,6 +158,7 @@
         var applicant_name = "";
         var cnic = "";
         var contact_no = "";
+        var application_id = "";
 
         $('[search="enable"]').each(function () {
             var input = $(this);
@@ -168,14 +169,16 @@
                     if (id == "applicant_name") { applicant_name = this.value; }
                     if (id == "cnic") { cnic = this.value; }
                     if (id == "contact_no") { contact_no = this.value; }
-                    var search = applicant_name + "|" + cnic + "|" + contact_no;
+                    if (id == "application_id") { application_id = this.value; }
+                    var search = applicant_name + "|" + cnic + "|" + contact_no + "|" + application_id;
                     pgrid.search(search).draw();
                 }
                 if (this.value == '') {
                     if (id == "applicant_name") { applicant_name = this.value; }
                     if (id == "cnic") { cnic = this.value; }
                     if (id == "contact_no") { contact_no = this.value; }
-                    var search = applicant_name + "|" + cnic + "|" + contact_no;
+                    if (id == "application_id") { application_id = this.value; }
+                    var search = applicant_name + "|" + cnic + "|" + contact_no + "|" + application_id;
                     pgrid.search(search).draw();
                 }
                 return;

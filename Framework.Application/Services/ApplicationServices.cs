@@ -224,6 +224,7 @@ namespace Framework.Application.Services
                 string applicantName = searchItems.Length >= 1 ? searchItems[0] : string.Empty;
                 string cnic = searchItems.Length >= 2 ? searchItems[1] : string.Empty;
                 string contactNo = searchItems.Length >= 3 ? searchItems[2] : string.Empty;
+                string applicationID = searchItems.Length >= 4 ? searchItems[3] : string.Empty;
 
                 using (var context = DataContextHelper.GetCPDataContext())
                 {
@@ -276,6 +277,10 @@ namespace Framework.Application.Services
                     if (!string.IsNullOrEmpty(contactNo))
                     {
                         ppSql = ppSql.Where(string.Format("X.ContactNo LIKE '%{0}%'", contactNo));
+                    }
+                    if(!string.IsNullOrEmpty(applicationID))
+                    {
+                        ppSql = ppSql.Where(string.Format("X.ApplicationID LIKE '%{0}%'", applicationID));
                     }
                     //if (roleID.HasValue) { ppSql = ppSql.Where("X.UserID IN (Select UserID From UserRoles Where RoleID = @0)", roleID.Value); }
                     //if (!string.IsNullOrEmpty(enterprise) && enterprise == "true") { ppSql = ppSql.Where("X.Enterprise = @0", enterprise); }
